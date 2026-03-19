@@ -31,7 +31,7 @@ interface GooglePlaceDetails {
   reviews?: GoogleReview[];
 }
 
-async function fetchGoogleReviews(placeId: string): Promise<{ business: any; reviews: any[] } | null> {
+async function fetchGoogleReviews(placeId: string): Promise<{ business: { name: string; rating: number; totalReviews: number; placeId: string }; reviews: { id: string; author: string; avatar: string; rating: number; text: string; date: string; relativeTime: string }[] } | null> {
   if (!GOOGLE_PLACES_API_KEY) {
     console.warn('GOOGLE_PLACES_API_KEY not set, using mock data');
     return null;
@@ -117,7 +117,7 @@ export async function GET(request: Request) {
 
   // Filter by rating
   const filteredReviews = data.reviews
-    .filter((r: any) => r.rating >= minRating)
+    .filter((r: { rating: number }) => r.rating >= minRating)
     .slice(0, maxReviews);
 
   return NextResponse.json({

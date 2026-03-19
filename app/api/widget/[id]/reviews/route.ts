@@ -12,6 +12,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+interface GoogleReview {
+  name: string;
+  text?: { text: string };
+  authorAttribution: { displayName: string; photoUri?: string };
+  rating: number;
+  publishTime: string;
+  relativePublishTimeDescription: string;
+}
+
+interface GooglePlace {
+  reviews?: GoogleReview[];
+  displayName: { text: string };
+  rating?: number;
+  userRatingCount?: number;
+  id: string;
+}
+
 async function fetchGoogleReviews(placeId: string) {
   if (!GOOGLE_PLACES_API_KEY) return null;
 
@@ -30,11 +47,11 @@ async function fetchGoogleReviews(placeId: string) {
 
     if (!response.ok) return null;
 
-    const place = await response.json();
+    const place: GooglePlace = await response.json();
 
     const reviews = (place.reviews || [])
-      .filter((review: any) => review.text?.text)
-      .map((review: any) => ({
+      .filter((review: GoogleReview) => review.text?.text)
+      .map((review: GoogleReview) => ({
         id: review.name.split('/').pop() || review.name,
         author: review.authorAttribution.displayName,
         avatar: review.authorAttribution.photoUri || 
@@ -100,7 +117,7 @@ export async function GET(
 
   // Filter reviews
   const filteredReviews = data.reviews
-    .filter((r: any) => r.rating >= minRating)
+    .filter((r: { rating: number }) => r.rating >= minRating)
     .slice(0, maxReviews);
 
   return NextResponse.json({

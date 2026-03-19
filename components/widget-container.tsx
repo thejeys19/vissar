@@ -10,6 +10,24 @@ interface WidgetContainerProps {
   className?: string;
 }
 
+interface VissarWidgetConfig {
+  widgetId: string;
+  layout: string;
+  maxReviews: number;
+  minRating: number;
+  autoStyle: boolean;
+}
+
+interface VissarWidgetClass {
+  new (container: HTMLDivElement, config: VissarWidgetConfig): { init: () => void };
+}
+
+declare global {
+  interface Window {
+    VissarWidget?: VissarWidgetClass;
+  }
+}
+
 export function WidgetContainer({ 
   widgetId, 
   layout = 'carousel', 
@@ -25,8 +43,8 @@ export function WidgetContainer({
     
     // Wait for VissarWidget to be available
     const initWidget = () => {
-      if (typeof window !== 'undefined' && (window as any).VissarWidget && containerRef.current) {
-        const widget = new (window as any).VissarWidget(containerRef.current, {
+      if (typeof window !== 'undefined' && window.VissarWidget && containerRef.current) {
+        const widget = new window.VissarWidget(containerRef.current, {
           widgetId,
           layout,
           maxReviews,
@@ -39,12 +57,12 @@ export function WidgetContainer({
     };
 
     // Check if widget script is already loaded
-    if ((window as any).VissarWidget) {
+    if (window.VissarWidget) {
       initWidget();
     } else {
       // Poll for widget availability
       const interval = setInterval(() => {
-        if ((window as any).VissarWidget) {
+        if (window.VissarWidget) {
           clearInterval(interval);
           initWidget();
         }
