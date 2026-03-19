@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - SaaS Landing Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Vissar brand styling */
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1E1B4B;
+            color: #fff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 120px 0;
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, #000 50%);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 100px;
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-bottom: 24px;
+        }
+        
+        h1 {
+            font-size: 72px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            background: linear-gradient(to bottom, #fff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        
+        .reviews-section {
+            padding: 100px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-header h2 {
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .section-header p {
+            color: #666;
+            font-size: 18px;
+        }
+        
+        /* Light card on dark bg */
+        .review-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 40px 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 640px) {
+            .review-card {
+                padding: 20px;
+                margin: 20px 0;
+            }
+            .container {
+                padding: 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="container">
+            <div class="badge">Now in beta</div>
+            <h1>The future of work</h1>
+            <p class="subtitle">Join thousands of teams already using our platform</p>
+        </div>
+    </section>
+    
+    <section class="reviews-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Loved by teams</h2>
+                <p>See what our customers have to say</p>
+            </div>
+            
+            <div class="review-card">
+                <!-- Widget on dark theme -->
+                <div data-vissar-widget="saas-reviews" data-vissar-layout="carousel" data-vissar-max-reviews="5"></div>
+            </div>
+            
+            <div class="review-card">
+                <!-- Grid layout -->
+                <div data-vissar-widget="saas-grid" data-vissar-layout="grid" data-vissar-max-reviews="6"></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Floating badge widget -->
+    <div data-vissar-widget="saas-badge" data-vissar-layout="badge" data-vissar-max-reviews="3"></div>
+    
+    <script src="./widget/vissar-widget.min.js"></script>
+</body>
+</html>
