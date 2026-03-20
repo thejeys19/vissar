@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { WidgetContainer } from "@/components/widget-container";
+import { Palette, Zap, LayoutGrid, Shield, SlidersHorizontal, CreditCard, Check } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -114,25 +115,29 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-8">
             {/* Light Theme Demo */}
-            <div className="bg-white p-8 rounded-2xl shadow-xl shadow-black/20">
-              <p className="text-sm font-semibold text-violet-600 mb-6 uppercase tracking-wide">Light Website</p>
-              <WidgetContainer 
-                widgetId="demo-light" 
-                layout="carousel"
-                maxReviews={3}
-              />
+            <div className="bg-white p-4 md:p-8 rounded-2xl shadow-xl shadow-black/20 overflow-hidden">
+              <p className="text-sm font-semibold text-violet-600 mb-4 md:mb-6 uppercase tracking-wide">Light Website</p>
+              <div className="min-h-[200px] md:min-h-[280px]">
+                <WidgetContainer 
+                  widgetId="demo-light" 
+                  layout="carousel"
+                  maxReviews={3}
+                />
+              </div>
             </div>
 
             {/* Dark Theme Demo */}
-            <div className="bg-slate-900 p-8 rounded-2xl shadow-xl shadow-black/20">
-              <p className="text-sm font-semibold text-violet-400 mb-6 uppercase tracking-wide">Dark Website</p>
-              <WidgetContainer 
-                widgetId="demo-dark" 
-                layout="grid"
-                maxReviews={4}
-              />
+            <div className="bg-slate-900 p-4 md:p-8 rounded-2xl shadow-xl shadow-black/20 overflow-hidden">
+              <p className="text-sm font-semibold text-violet-400 mb-4 md:mb-6 uppercase tracking-wide">Dark Website</p>
+              <div className="min-h-[200px] md:min-h-[280px]">
+                <WidgetContainer 
+                  widgetId="demo-dark" 
+                  layout="grid"
+                  maxReviews={4}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -152,38 +157,40 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: '🎨',
+                icon: Palette,
                 title: 'Auto-Styled',
                 description: 'Automatically matches your fonts, colors, and spacing. No configuration needed.',
               },
               {
-                icon: '⚡',
+                icon: Zap,
                 title: 'Lightning Fast',
                 description: 'Under 30KB, zero dependencies. Loads instantly without slowing your site.',
               },
               {
-                icon: '📱',
+                icon: LayoutGrid,
                 title: 'Multiple Layouts',
                 description: 'Carousel, grid, list, or floating badge. Choose what works best for your design.',
               },
               {
-                icon: '🔒',
+                icon: Shield,
                 title: 'Privacy First',
                 description: 'No cookies, no tracking. Just clean, fast review widgets.',
               },
               {
-                icon: '🎛️',
+                icon: SlidersHorizontal,
                 title: 'Deep Customization',
                 description: 'Override any style when you need precise control. CSS custom properties supported.',
               },
               {
-                icon: '💰',
+                icon: CreditCard,
                 title: 'Affordable',
                 description: 'Free tier available. Pro plans start at $5/month — half the price of competitors.',
               },
             ].map((feature) => (
               <div key={feature.title} className="p-6 rounded-2xl border border-violet-100 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 bg-white">
-                <div className="text-3xl mb-4">{feature.icon}</div>
+                <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                  <feature.icon className="w-6 h-6 text-violet-600" />
+                </div>
                 <h3 className="font-bold text-lg text-vissar-night mb-2">{feature.title}</h3>
                 <p className="text-violet-800/70 leading-relaxed">{feature.description}</p>
               </div>
