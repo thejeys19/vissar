@@ -46,7 +46,7 @@ async function fetchGoogleReviews(placeId: string): Promise<{ business: { name: 
           'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
           'X-Goog-FieldMask': 'id,displayName,rating,userRatingCount,reviews',
         },
-        next: { revalidate: 3600 }, // Cache for 1 hour
+        next: { revalidate: 86400 }, // Cache for 24 hours
       }
     );
 
