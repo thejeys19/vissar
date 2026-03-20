@@ -9,7 +9,8 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user: _user, account, profile: _profile }) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
         return true;
       }
