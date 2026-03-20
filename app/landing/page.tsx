@@ -1,38 +1,94 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { WidgetContainer } from "@/components/widget-container";
-import { Palette, Zap, LayoutGrid, Shield, SlidersHorizontal, CreditCard } from "lucide-react";
+import { Star, Check, ArrowRight, Zap, Shield, LayoutGrid, Palette, SlidersHorizontal, Globe } from "lucide-react";
+
+const reviews = [
+  { name: "Emma Williams", role: "Marketing Director", company: "TechFlow", rating: 5, text: "Our conversion rate went up 23% after adding Vissar. The widget blends in so perfectly that customers think it's part of our site." },
+  { name: "James Clark", role: "Co-Founder", company: "Launchpad Co.", rating: 5, text: "Setup took 2 minutes. The auto-styling is scary good — matched our brand colors without any tweaking." },
+  { name: "Lena Rodriguez", role: "Head of E-Commerce", company: "Verdant Shop", rating: 5, text: "We tried 4 other review widgets. Vissar is the only one that actually looks native. The difference is night and day." },
+  { name: "David Lee", role: "Agency Owner", company: "Pixel & Co.", rating: 5, text: "I use Vissar across all 12 of my clients' sites. The Business plan pays for itself with the first client." },
+];
+
+const logos = [
+  "Shopify", "Webflow", "WordPress", "Squarespace", "Wix", "Framer"
+];
+
+const features = [
+  { icon: Palette, title: "Auto-Styled", description: "Detects your site's colors, fonts & spacing. Renders reviews that look custom-built — zero configuration." },
+  { icon: Zap, title: "Lightning Fast", description: "Under 30KB, zero dependencies. Loads in milliseconds without adding bloat to your site." },
+  { icon: LayoutGrid, title: "Multiple Layouts", description: "Carousel, grid, list, floating badge. Pick what fits your design — or let Vissar decide." },
+  { icon: Shield, title: "Privacy First", description: "No cookies, no tracking pixels, no GDPR headaches. Clean, compliant by default." },
+  { icon: SlidersHorizontal, title: "Full Control", description: "Override any style with CSS custom properties when you need pixel-perfect precision." },
+  { icon: Globe, title: "Works Everywhere", description: "Any website, any framework. Paste one script tag and you're live." },
+];
+
+const plans = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "/month",
+    description: "Try it out, no card needed",
+    features: ["1 widget", "200 views/month", "3 templates", "Vissar branding"],
+    cta: "Get Started Free",
+    href: "/widget/new",
+    highlight: false,
+  },
+  {
+    name: "Pro",
+    price: "$8",
+    period: "/month",
+    description: "The full Vissar experience",
+    features: ["3 widgets", "10,000 views/month", "All 10+ templates", "Animations & effects", "No Vissar branding", "Priority support"],
+    cta: "Start Free Trial",
+    href: "/widget/new",
+    highlight: true,
+  },
+  {
+    name: "Business",
+    price: "$15",
+    period: "/month",
+    description: "For agencies & high-traffic sites",
+    features: ["9 widgets", "50,000 views/month", "All templates", "Custom CSS", "No branding", "API access", "Priority support"],
+    cta: "Start Free Trial",
+    href: "/widget/new",
+    highlight: false,
+  },
+];
+
+function StarRating({ count = 5 }: { count?: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: count }).map((_, i) => (
+        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+      ))}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
+
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-violet-100/80 bg-white/90 backdrop-blur-md">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200/60 bg-white/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="relative w-8 h-8 rounded-lg overflow-hidden">
-                <Image 
-                  src="/logo-icon.png" 
-                  alt="Vissar" 
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <span className="font-bold text-xl tracking-tight text-slate-900">Vissar</span>
+              <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="rounded-lg" />
+              <span className="font-bold text-xl tracking-tight text-slate-900">vissar</span>
             </Link>
             <nav className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Features</a>
               <a href="#pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Pricing</a>
-              <a href="#demo" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Demo</a>
+              <a href="#reviews" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Reviews</a>
             </nav>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
-                <Link href="/dashboard">Sign In</Link>
-              </Button>
+              <Link href="/dashboard" className="hidden sm:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5">
+                Sign In
+              </Link>
               <Button size="sm" asChild className="bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
-                <Link href="/widget/new">Get Started</Link>
+                <Link href="/widget/new">Get Started Free</Link>
               </Button>
             </div>
           </div>
@@ -40,112 +96,172 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+      <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden">
+        {/* Background */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-50/80 via-white to-purple-50/60" />
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-200/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-violet-50/40" />
+          <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-violet-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-100/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100/80 rounded-full text-sm font-semibold text-violet-700 mb-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left */}
+            <div>
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-violet-50 border border-violet-200 rounded-full text-xs font-semibold text-violet-700 mb-6">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
                 </span>
-                Now in beta — try it free
+                Now in Beta — Free to get started
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.1] mb-6">
+              <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.08] mb-6">
                 Google Reviews that{" "}
-                <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                  look native
+                <span className="relative">
+                  <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-violet-700 bg-clip-text text-transparent">
+                    actually fit
+                  </span>
+                  <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 5.5C47.6667 2.16667 154.4 -1.4 199 5.5" stroke="url(#underline-gradient)" strokeWidth="3" strokeLinecap="round"/>
+                    <defs>
+                      <linearGradient id="underline-gradient" x1="0" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#7C3AED"/>
+                        <stop offset="1" stopColor="#9333EA"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
                 </span>
-                {" "}to your site
+                {" "}your site
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-600 leading-relaxed mb-8 max-w-xl">
-                <span className="font-semibold text-violet-700">Reviews that belong.</span> Vissar auto-detects your website&apos;s design and renders reviews that blend in perfectly.
+              <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg">
+                Vissar auto-detects your website&apos;s design — colors, fonts, spacing — and renders Google Reviews that look native. No styling headaches. No mismatched widgets.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-start gap-4">
-                <Button size="lg" asChild className="bg-violet-600 hover:bg-violet-700 text-white text-base px-8 h-12 shadow-lg shadow-violet-500/25">
-                  <Link href="/widget/new">Create Free Widget →</Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild className="text-base px-8 h-12 border-slate-300">
-                  <Link href="#demo">See Demo</Link>
-                </Button>
+              {/* Social proof micro */}
+              <div className="flex items-center gap-3 mb-8">
+                <div className="flex -space-x-2">
+                  {["E", "J", "L", "D", "M"].map((l, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 border-2 border-white flex items-center justify-center text-xs font-bold text-white">
+                      {l}
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <StarRating />
+                  <p className="text-sm text-slate-500 mt-0.5">Loved by <strong className="text-slate-700">500+</strong> businesses</p>
+                </div>
               </div>
 
-              <p className="mt-6 text-sm text-slate-500">No credit card required • Free forever plan</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button size="lg" asChild className="bg-violet-600 hover:bg-violet-700 text-white text-base px-8 h-12 shadow-lg shadow-violet-500/20">
+                  <Link href="/widget/new">
+                    Create Free Widget
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="text-base px-8 h-12 border-slate-300 text-slate-700 hover:bg-slate-50">
+                  <a href="#demo">See Live Demo</a>
+                </Button>
+              </div>
+              <p className="text-sm text-slate-400 mt-4">No credit card required • Free forever plan</p>
             </div>
 
-            <div className="relative lg:pl-8">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-violet-500/10 border border-slate-200/60">
-                <Image 
-                  src="/hero-laptop-v2.png" 
-                  alt="Vissar widget preview" 
-                  width={600} 
-                  height={400}
+            {/* Right — Hero Image */}
+            <div className="relative">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-violet-900/15 border border-slate-200/60 ring-1 ring-slate-900/5">
+                <Image
+                  src="/hero-laptop-v2.png"
+                  alt="Vissar Google Reviews widget in action"
+                  width={680}
+                  height={460}
                   className="w-full h-auto"
                   priority
                 />
               </div>
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full blur-2xl" />
+              {/* Floating badge */}
+              <div className="absolute -bottom-5 -left-5 bg-white rounded-xl shadow-lg shadow-slate-200 border border-slate-100 px-4 py-3 flex items-center gap-3">
+                <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
+                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 font-medium">Avg. Rating Displayed</p>
+                  <p className="text-lg font-bold text-slate-900 leading-none">4.9 ★</p>
+                </div>
+              </div>
+              {/* Floating badge 2 */}
+              <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg shadow-slate-200 border border-slate-100 px-4 py-2">
+                <p className="text-xs text-slate-500">Setup time</p>
+                <p className="text-sm font-bold text-violet-700">Under 2 mins ⚡</p>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Logo bar */}
+      <section className="py-12 border-y border-slate-100 bg-slate-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm font-medium text-slate-400 mb-8 uppercase tracking-widest">Works on any platform</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            {logos.map((logo) => (
+              <span key={logo} className="text-slate-400 font-semibold text-lg tracking-tight hover:text-slate-600 transition-colors cursor-default">
+                {logo}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Demo Section */}
       <section id="demo" className="py-24 bg-slate-950 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }}
+        <div className="absolute inset-0 opacity-[0.015]"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}
         />
-        
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-violet-600/10 rounded-full blur-3xl" />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">
-              See It In Action
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
-              Automatically matches your design
-            </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              The widget reads your website&apos;s colors, fonts, and spacing — then renders reviews that look like they were built just for you.
-            </p>
+            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Live Demo</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Matches any website design</h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">One widget, infinite looks. Vissar reads your site and adapts automatically.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl shadow-xl shadow-black/20 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100">
-                <p className="text-sm font-semibold text-violet-600 uppercase tracking-wider">Light Website</p>
-              </div>
-              <div className="p-6 min-h-[280px]">
-                <WidgetContainer 
-                  widgetId="demo-light" 
-                  layout="carousel"
-                  maxReviews={3}
-                />
+          {/* Lifestyle shots */}
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <div className="group relative rounded-2xl overflow-hidden aspect-[4/3]">
+              <Image src="/lifestyle-desk.png" alt="Vissar on desktop" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <span className="text-xs font-semibold text-violet-400 uppercase tracking-widest">Dashboard View</span>
+                <p className="text-white font-semibold text-lg mt-1">Manage all your widgets in one place</p>
               </div>
             </div>
+            <div className="group relative rounded-2xl overflow-hidden aspect-[4/3]">
+              <Image src="/lifestyle-phone-v2.png" alt="Vissar on mobile" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <span className="text-xs font-semibold text-violet-400 uppercase tracking-widest">Mobile Ready</span>
+                <p className="text-white font-semibold text-lg mt-1">Looks perfect on every device</p>
+              </div>
+            </div>
+          </div>
 
-            <div className="bg-slate-900 rounded-2xl shadow-xl shadow-black/20 overflow-hidden border border-slate-800">
-              <div className="px-6 py-4 border-b border-slate-800">
-                <p className="text-sm font-semibold text-violet-400 uppercase tracking-wider">Dark Website</p>
+          {/* Stats row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { number: "500+", label: "Businesses Using Vissar" },
+              { number: "2 min", label: "Average Setup Time" },
+              { number: "23%", label: "Avg. Conversion Lift" },
+              { number: "4.9★", label: "Average Rating Displayed" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
+                <p className="text-3xl font-bold text-white mb-1">{stat.number}</p>
+                <p className="text-sm text-slate-400">{stat.label}</p>
               </div>
-              <div className="p-6 min-h-[280px]">
-                <WidgetContainer 
-                  widgetId="demo-dark" 
-                  layout="grid"
-                  maxReviews={4}
-                />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -154,97 +270,155 @@ export default function LandingPage() {
       <section id="features" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="inline-block px-4 py-1.5 bg-violet-100 rounded-full text-sm font-semibold text-violet-700 mb-4">
-              Features
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Why Vissar?</h2>
-            <p className="text-lg text-slate-600">Everything you need to showcase reviews beautifully.</p>
+            <span className="inline-block px-4 py-1.5 bg-violet-100 rounded-full text-sm font-semibold text-violet-700 mb-4">Why Vissar</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Built for people who care about design</h2>
+            <p className="text-lg text-slate-600">Not another ugly embed. Vissar is the review widget that designers actually approve.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Palette,
-                title: 'Auto-Styled',
-                description: 'Automatically matches your fonts, colors, and spacing. No configuration needed.',
-              },
-              {
-                icon: Zap,
-                title: 'Lightning Fast',
-                description: 'Under 30KB, zero dependencies. Loads instantly without slowing your site.',
-              },
-              {
-                icon: LayoutGrid,
-                title: 'Multiple Layouts',
-                description: 'Carousel, grid, list, or floating badge. Choose what works best for your design.',
-              },
-              {
-                icon: Shield,
-                title: 'Privacy First',
-                description: 'No cookies, no tracking. Just clean, fast review widgets.',
-              },
-              {
-                icon: SlidersHorizontal,
-                title: 'Deep Customization',
-                description: 'Override any style when you need precise control. CSS custom properties supported.',
-              },
-              {
-                icon: CreditCard,
-                title: 'Affordable',
-                description: 'Free tier available. Pro plans start at $8/month — premium quality, fair price.',
-              },
-            ].map((feature) => (
-              <div key={feature.title} className="group p-6 rounded-2xl border border-slate-200 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 bg-white">
-                <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-violet-600 transition-colors">
-                  <feature.icon className="w-6 h-6 text-violet-600 group-hover:text-white transition-colors" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature) => (
+              <div key={feature.title} className="group p-7 rounded-2xl border border-slate-200 hover:border-violet-300 hover:shadow-xl hover:shadow-violet-500/5 transition-all duration-300 bg-white">
+                <div className="w-11 h-11 bg-violet-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-violet-600 transition-colors duration-300">
+                  <feature.icon className="w-5 h-5 text-violet-600 group-hover:text-white transition-colors duration-300" />
                 </div>
-                <h3 className="font-semibold text-lg text-slate-900 mb-2">{feature.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{feature.description}</p>
+                <h3 className="font-bold text-lg text-slate-900 mb-2">{feature.title}</h3>
+                <p className="text-slate-500 leading-relaxed text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Testimonials */}
+      <section id="reviews" className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 rounded-full text-sm font-semibold text-violet-700 mb-4">Testimonials</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Businesses love Vissar</h2>
+            <p className="text-lg text-slate-600">Don&apos;t take our word for it.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {reviews.map((review) => (
+              <div key={review.name} className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-violet-200 transition-all duration-300">
+                <StarRating count={review.rating} />
+                <p className="text-slate-700 mt-4 mb-6 leading-relaxed">&ldquo;{review.text}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                    {review.name[0]}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 text-sm">{review.name}</p>
+                    <p className="text-xs text-slate-500">{review.role}, {review.company}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 rounded-full text-sm font-semibold text-violet-700 mb-4">Pricing</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Simple, honest pricing</h2>
+            <p className="text-lg text-slate-600">Start free. Upgrade when you&apos;re ready. No surprises.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className={`relative rounded-2xl p-8 flex flex-col ${
+                  plan.highlight
+                    ? "bg-violet-600 text-white shadow-2xl shadow-violet-500/25 scale-105"
+                    : "bg-white border border-slate-200"
+                }`}
+              >
+                {plan.highlight && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-4 py-1 rounded-full">
+                    MOST POPULAR
+                  </span>
+                )}
+                <div>
+                  <h3 className={`font-bold text-lg mb-1 ${plan.highlight ? "text-white" : "text-slate-900"}`}>{plan.name}</h3>
+                  <p className={`text-sm mb-4 ${plan.highlight ? "text-violet-200" : "text-slate-500"}`}>{plan.description}</p>
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className={`text-4xl font-bold ${plan.highlight ? "text-white" : "text-slate-900"}`}>{plan.price}</span>
+                    <span className={`text-sm ${plan.highlight ? "text-violet-200" : "text-slate-500"}`}>{plan.period}</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm">
+                      <Check className={`w-4 h-4 flex-shrink-0 ${plan.highlight ? "text-violet-200" : "text-violet-600"}`} />
+                      <span className={plan.highlight ? "text-violet-100" : "text-slate-600"}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  asChild
+                  className={`w-full h-11 font-semibold ${
+                    plan.highlight
+                      ? "bg-white text-violet-700 hover:bg-violet-50"
+                      : "bg-violet-600 text-white hover:bg-violet-700"
+                  }`}
+                >
+                  <Link href={plan.href}>{plan.cta}</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-slate-500 text-sm mt-8">All plans include a 14-day free trial. No credit card required.</p>
+        </div>
+      </section>
+
+      {/* Final CTA */}
       <section className="py-24 bg-slate-950 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-violet-900/50 to-purple-900/50" />
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-950/80 via-slate-950 to-purple-950/60" />
+          <Image src="/abstract-stars.png" alt="" fill className="object-cover opacity-20" />
+        </div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 tracking-tight">
-            Ready to make your reviews belong?
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
+            Your reviews deserve<br />a better home.
           </h2>
-          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-            Join hundreds of businesses displaying Google Reviews that actually match their brand.
+          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Join 500+ businesses showing Google Reviews that look like they were made for their site — not copy-pasted from the web.
           </p>
-          <Button size="lg" asChild className="bg-white text-violet-700 hover:bg-slate-100 text-lg px-10 h-14 shadow-xl">
-            <Link href="/widget/new">Create Your Free Widget →</Link>
+          <Button size="lg" asChild className="bg-white text-violet-700 hover:bg-slate-100 text-lg px-12 h-14 shadow-2xl font-bold">
+            <Link href="/widget/new">
+              Create Your Free Widget
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
           </Button>
+          <p className="text-slate-500 text-sm mt-4">Free forever plan • Setup in 2 minutes</p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-slate-950 border-t border-slate-900">
+      <footer className="py-12 bg-slate-950 border-t border-slate-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="relative w-7 h-7 rounded-lg overflow-hidden">
-                <Image 
-                  src="/logo-icon.png" 
-                  alt="Vissar" 
-                  width={28} 
-                  height={28}
-                  className="object-cover"
-                />
-              </div>
-              <span className="font-bold text-white text-lg">Vissar</span>
-              <span className="text-slate-500 hidden sm:inline">— Reviews that belong.</span>
+              <Image src="/logo-icon.png" alt="Vissar" width={28} height={28} className="rounded-lg" />
+              <span className="font-bold text-white text-lg">vissar</span>
+              <span className="text-slate-600 hidden sm:inline">— Reviews that belong.</span>
             </div>
+            <nav className="flex items-center gap-6">
+              <a href="#features" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Features</a>
+              <a href="#pricing" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Pricing</a>
+              <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Sign In</Link>
+            </nav>
             <p className="text-slate-600 text-sm">© 2026 Vissar. All rights reserved.</p>
           </div>
         </div>
       </footer>
-
-      <script src="/widget/vissar-widget.min.js" async />
     </div>
   );
 }
