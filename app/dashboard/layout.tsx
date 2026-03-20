@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard, Plus, Settings, CreditCard, LogOut, User } from "lucide-react";
 
 // Demo user for when auth is not configured
@@ -42,10 +43,8 @@ export default async function DashboardLayout({
       <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800">
         <div className="p-6">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">V</span>
-            </div>
-            <span className="font-bold text-xl">Vissar</span>
+            <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="rounded-lg" />
+            <span className="font-bold text-xl">vissar</span>
           </Link>
         </div>
 

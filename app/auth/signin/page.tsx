@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function SignInPage() {
   let session = null;
@@ -23,10 +24,8 @@ export default async function SignInPage() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold">V</span>
-            </div>
-            <span className="font-bold text-2xl text-white">Vissar</span>
+            <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="rounded-xl" />
+            <span className="font-bold text-2xl text-white">vissar</span>
           </Link>
           
           <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>

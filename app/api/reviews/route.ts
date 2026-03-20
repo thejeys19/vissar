@@ -1,8 +1,43 @@
 import { NextResponse } from 'next/server';
 import { MOCK_REVIEWS, MOCK_BUSINESS } from '@/lib/mock-data';
+import { readFile, writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const GOOGLE_PLACES_API_URL = 'https://places.googleapis.com/v1/places';
+const CACHE_DIR = '/tmp/vissar-cache';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CacheEntry {
+  data: Record<string, unknown>;
+  cachedAt: string;
+}
+
+async function readCache(placeId: string): Promise<CacheEntry | null> {
+  try {
+    const filePath = path.join(CACHE_DIR, `${placeId}.json`);
+    const raw = await readFile(filePath, 'utf-8');
+    const entry: CacheEntry = JSON.parse(raw);
+    const age = Date.now() - new Date(entry.cachedAt).getTime();
+    if (age < CACHE_TTL_MS) {
+      return entry;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCache(placeId: string, data: Record<string, unknown>): Promise<void> {
+  try {
+    await mkdir(CACHE_DIR, { recursive: true });
+    const filePath = path.join(CACHE_DIR, `${placeId}.json`);
+    const entry: CacheEntry = { data, cachedAt: new Date().toISOString() };
+    await writeFile(filePath, JSON.stringify(entry), 'utf-8');
+  } catch (err) {
+    console.error('Cache write error:', err);
+  }
+}
 
 interface GoogleReview {
   name: string;
@@ -107,15 +142,22 @@ export async function GET(request: Request) {
 
   // Try to fetch real Google reviews if API key is set and not using mock
   if (placeId !== 'mock' && GOOGLE_PLACES_API_KEY) {
-    const googleData = await fetchGoogleReviews(placeId);
-    if (googleData) {
-      data = googleData;
+    // Check server-side file cache first
+    const cached = await readCache(placeId);
+    if (cached) {
+      data = cached.data;
     } else {
-      // Fallback to mock data
-      data = {
-        business: MOCK_BUSINESS,
-        reviews: MOCK_REVIEWS,
-      };
+      const googleData = await fetchGoogleReviews(placeId);
+      if (googleData) {
+        data = googleData;
+        await writeCache(placeId, googleData as unknown as Record<string, unknown>);
+      } else {
+        // Fallback to mock data
+        data = {
+          business: MOCK_BUSINESS,
+          reviews: MOCK_REVIEWS,
+        };
+      }
     }
   } else {
     // Use mock data for development/testing

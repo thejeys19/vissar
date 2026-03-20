@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Check, Zap, Crown, Sparkles } from "lucide-react";
 
@@ -66,10 +67,8 @@ export default function PricingPage() {
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">V</span>
-            </div>
-            <span className="font-bold text-xl text-slate-900">Vissar</span>
+            <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="rounded-lg" />
+            <span className="font-bold text-xl text-slate-900">vissar</span>
           </Link>
           <Button variant="outline" size="sm" asChild className="border-slate-300">
             <Link href="/landing">← Back to Home</Link>

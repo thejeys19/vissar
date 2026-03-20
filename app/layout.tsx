@@ -10,8 +10,20 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Vissar - Reviews that belong",
-  description: "Auto-styled Google Reviews widgets for any website",
+  title: "Vissar — Reviews that belong",
+  description: "Auto-styled Google Reviews widgets that match your website design. Set up in 2 minutes.",
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "Vissar — Reviews that belong",
+    description: "Auto-styled Google Reviews widgets that match your website design.",
+    siteName: "Vissar",
+  },
 };
 
 export default function RootLayout({
