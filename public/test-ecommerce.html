@@ -3,131 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test - E-commerce Site</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Test: E-Commerce Site - Vissar Widget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        /* Simulating a Shopify/WooCommerce style */
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #faf9fb;
-            color: #1a1a1a;
-            line-height: 1.6;
-        }
-        
-        .header {
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            color: #111;
-            letter-spacing: -0.5px;
-        }
-        
-        .nav a {
-            color: #666;
-            text-decoration: none;
-            margin-left: 30px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .nav a:hover { color: #111; }
-        
-        .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 80px 40px;
-            text-align: center;
-        }
-        
-        .hero h1 {
-            font-size: 48px;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-        
-        .content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 40px;
-        }
-        
-        .reviews-section {
-            background: #fff;
-            border-radius: 16px;
-            padding: 40px;
-            margin: 40px 0;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        
-        .section-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            color: #111;
-        }
-        
-        /* Dark section test */
-        .dark-section {
-            background: #0f0f0f;
-            color: #fff;
-            padding: 60px 40px;
-            margin: 40px -40px;
-        }
-        
-        .dark-section .section-title {
-            color: #fff;
-        }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
-    <header class="header">
-        <div class="logo">LUXE STORE</div>
-        <nav class="nav">
-            <a href="#">Shop</a>
-            <a href="#">Collections</a>
-            <a href="#">About</a>
-            <a href="#">Contact</a>
-        </nav>
+<body class="bg-gray-50 text-gray-900">
+    <!-- E-commerce Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-8">
+                    <h1 class="text-2xl font-bold text-gray-900">ShopFlow</h1>
+                    <nav class="hidden md:flex items-center gap-6">
+                        <a href="#" class="text-gray-600 hover:text-gray-900 font-medium">New Arrivals</a>
+                        <a href="#" class="text-gray-600 hover:text-gray-900 font-medium">Men</a>
+                        <a href="#" class="text-gray-600 hover:text-gray-900 font-medium">Women</a>
+                        <a href="#" class="text-gray-600 hover:text-gray-900 font-medium">Sale</a>
+                    </nav>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="p-2 text-gray-600 hover:text-gray-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                    <button class="p-2 text-gray-600 hover:text-gray-900 relative">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </header>
-    
-    <section class="hero">
-        <h1>Premium Products</h1>
-        <p>Quality you can trust. See what our customers say.</p>
+
+    <!-- Product Hero -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid lg:grid-cols-2 gap-12">
+            <!-- Product Image -->
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg">
+                <div class="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="w-64 h-64 bg-gray-300 rounded-lg mx-auto mb-4"></div>
+                        <p class="text-gray-500">Product Image</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="space-y-6">
+                <div>
+                    <p class="text-sm font-medium text-blue-600 mb-2">Men's Collection</p>
+                    <h2 class="text-3xl font-bold text-gray-900">Premium Cotton Tee</h2>
+                    <div class="flex items-center gap-4 mt-4">
+                        <span class="text-3xl font-bold text-gray-900">$89.00</span>
+                        <span class="text-lg text-gray-400 line-through">$129.00</span>
+                        <span class="px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full">31% OFF</span>
+                    </div>
+                </div>
+
+                <p class="text-gray-600 leading-relaxed">
+                    Experience ultimate comfort with our premium cotton tee. Made from 100% organic cotton, 
+                    featuring a modern fit that works for any occasion. Breathable, durable, and sustainably made.
+                </p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                        <div class="flex gap-2">
+                            {['S', 'M', 'L', 'XL', 'XXL'].map(size => (
+                                <button key={size} class="w-12 h-12 border-2 border-gray-200 rounded-lg font-medium text-gray-700 hover:border-blue-500 hover:text-blue-600 transition-colors">
+                                    {size}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                        <div class="flex gap-2">
+                            {['bg-gray-900', 'bg-blue-600', 'bg-green-600', 'bg-red-600'].map((color, i) => (
+                                <button key={i} class={`w-10 h-10 ${color} rounded-full border-2 border-white shadow-md hover:scale-110 transition-transform`}></button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button class="flex-1 bg-gray-900 text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors">
+                        Add to Cart
+                    </button>
+                    <button class="p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 transition-colors">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-6 text-sm text-gray-600">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Free shipping over $50
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        30-day returns
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
-    
-    <div class="content">
-        <div class="reviews-section">
-            <h2 class="section-title">What Customers Say</h2>
-            <!-- Vissar Widget - Carousel on light background -->
-            <div data-vissar-widget="luxe-store" data-vissar-layout="carousel" data-vissar-max-reviews="5"></div>
+
+    <!-- Vissar Widget Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-200">
+        <div class="max-w-4xl mx-auto">
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Customer Reviews</h3>
+            <p class="text-gray-600 mb-8">See what our customers are saying about this product</p>
+            
+            <!-- Vissar Widget -->
+            <div 
+                data-vissar-widget="test-ecommerce"
+                data-vissar-layout="carousel"
+                data-vissar-max-reviews="5"
+                data-vissar-template="soft"
+            ></div>
         </div>
-        
-        <div class="reviews-section">
-            <h2 class="section-title">More Reviews</h2>
-            <!-- Grid layout -->
-            <div data-vissar-widget="luxe-store-grid" data-vissar-layout="grid" data-vissar-max-reviews="6"></div>
-        </div>
-        
-        <div class="dark-section">
-            <h2 class="section-title">Customer Love</h2>
-            <!-- Widget on dark background -->
-            <div data-vissar-widget="luxe-store-dark" data-vissar-layout="list" data-vissar-max-reviews="4"></div>
-        </div>
-    </div>
-    
-    <!-- Load Vissar Widget -->
-    <script src="./widget/vissar-widget.min.js"></script>
+    </section>
+
+    <!-- Vissar Widget Script -->
+    <script src="https://vissar.vercel.app/widget/vissar-widget.min.js" async></script>
 </body>
 </html>
