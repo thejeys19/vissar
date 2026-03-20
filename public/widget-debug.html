@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vissar Widget Debug</title>
+  <style>
+    body { font-family: system-ui; padding: 40px; background: #f5f5f5; }
+    .widget-container { background: white; padding: 30px; border-radius: 12px; max-width: 800px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div class="widget-container">
+    <h2>Vissar Widget Test</h2>
+    <div id="debug-info">Loading... </div>
+    
+    <!-- Widget -->
+    <div 
+      data-vissar-widget="demo-test"
+      data-vissar-layout="carousel"
+      data-vissar-max-reviews="3"
+      data-vissar-template="soft"
+    ></div>
+  </div>
+
+  <script>
+    // Debug logging
+    window.onerror = function(msg, url, line) {
+      document.getElementById('debug-info').innerHTML += '<br><strong>Error:</strong> ' + msg + ' (line ' + line + ')';
+      return false;
+    };
+
+    // Check if widget loads
+    setTimeout(() => {
+      if (window.VissarWidget) {
+        document.getElementById('debug-info').innerHTML = '<span style="color: green">✓ Widget script loaded</span>';
+      } else {
+        document.getElementById('debug-info').innerHTML = '<span style="color: red">✗ Widget script NOT loaded</span>';
+      }
+    }, 2000);
+  </script>
+
+  <script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>
+</body>
+</html>
