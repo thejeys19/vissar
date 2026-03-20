@@ -43,7 +43,7 @@ export default async function DashboardLayout({
       <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800">
         <div className="p-6">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="rounded-lg" />
+            <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-10 h-10 rounded-lg" />
             <span className="font-bold text-xl">vissar</span>
           </Link>
         </div>

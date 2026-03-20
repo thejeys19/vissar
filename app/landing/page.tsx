@@ -75,7 +75,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5">
-              <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="rounded-lg" />
+              <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-10 h-10 rounded-lg" />
               <span className="font-bold text-xl tracking-tight text-slate-900">vissar</span>
             </Link>
             <nav className="hidden md:flex items-center gap-8">
@@ -289,6 +289,107 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Style Showcase */}
+      <section className="py-24 bg-slate-950 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Templates</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Choose your style</h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">6 premium templates included. Each one adapts to your brand.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Soft Shadow */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-white rounded-xl p-5 shadow-lg shadow-slate-200/50 mb-4">
+                  <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
+                  <div className="h-2 w-3/4 bg-slate-200 rounded mb-1.5"/>
+                  <div className="h-2 w-1/2 bg-slate-100 rounded"/>
+                  <div className="flex items-center gap-2 mt-3"><div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-400 to-purple-500"/><div className="h-2 w-16 bg-slate-200 rounded"/></div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Soft Shadow</h3>
+                <p className="text-xs text-slate-500">Gentle, elevated cards</p>
+              </div>
+            </Link>
+
+            {/* Glassmorphism */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-gradient-to-br from-violet-500/10 to-blue-500/10 backdrop-blur rounded-xl p-5 border border-white/10 mb-4">
+                  <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
+                  <div className="h-2 w-3/4 bg-white/20 rounded mb-1.5"/>
+                  <div className="h-2 w-1/2 bg-white/10 rounded"/>
+                  <div className="flex items-center gap-2 mt-3"><div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-400 to-blue-400"/><div className="h-2 w-16 bg-white/20 rounded"/></div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Glassmorphism</h3>
+                <p className="text-xs text-slate-500">Frosted glass blur effect</p>
+              </div>
+            </Link>
+
+            {/* Minimal */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-white rounded-xl p-5 border-2 border-slate-200 mb-4">
+                  <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
+                  <div className="h-2 w-3/4 bg-slate-200 rounded mb-1.5"/>
+                  <div className="h-2 w-1/2 bg-slate-100 rounded"/>
+                  <div className="flex items-center gap-2 mt-3"><div className="w-6 h-6 rounded-full bg-slate-300"/><div className="h-2 w-16 bg-slate-200 rounded"/></div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Minimal</h3>
+                <p className="text-xs text-slate-500">Clean, borderline elegance</p>
+              </div>
+            </Link>
+
+            {/* Dark Elegant */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-slate-800 rounded-xl p-5 border border-slate-700 mb-4">
+                  <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
+                  <div className="h-2 w-3/4 bg-slate-600 rounded mb-1.5"/>
+                  <div className="h-2 w-1/2 bg-slate-700 rounded"/>
+                  <div className="flex items-center gap-2 mt-3"><div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-600"/><div className="h-2 w-16 bg-slate-600 rounded"/></div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Dark Elegant</h3>
+                <p className="text-xs text-slate-500">Sophisticated dark mode</p>
+              </div>
+            </Link>
+
+            {/* Gradient Border */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-white rounded-xl p-5 border-2 border-violet-500 mb-4">
+                  <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
+                  <div className="h-2 w-3/4 bg-slate-200 rounded mb-1.5"/>
+                  <div className="h-2 w-1/2 bg-violet-100 rounded"/>
+                  <div className="flex items-center gap-2 mt-3"><div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-600"/><div className="h-2 w-16 bg-violet-200 rounded"/></div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Gradient Border</h3>
+                <p className="text-xs text-slate-500">Violet gradient edges</p>
+              </div>
+            </Link>
+
+            {/* Neon */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-slate-900 rounded-xl p-5 border border-cyan-400/60 shadow-[0_0_15px_rgba(34,211,238,0.15)] mb-4">
+                  <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
+                  <div className="h-2 w-3/4 bg-slate-700 rounded mb-1.5"/>
+                  <div className="h-2 w-1/2 bg-slate-800 rounded"/>
+                  <div className="flex items-center gap-2 mt-3"><div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-violet-500"/><div className="h-2 w-16 bg-slate-700 rounded"/></div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Neon</h3>
+                <p className="text-xs text-slate-500">Glowing neon accents</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section id="reviews" className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -406,7 +507,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <Image src="/logo-icon.png" alt="Vissar" width={28} height={28} className="rounded-lg" />
+              <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="w-8 h-8 rounded-lg" />
               <span className="font-bold text-white text-lg">vissar</span>
               <span className="text-slate-600 hidden sm:inline">— Reviews that belong.</span>
             </div>

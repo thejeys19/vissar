@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, ChevronLeft, ChevronRight, LayoutGrid, List, Columns, MessageCircle } from 'lucide-react';
+import { Check, Copy, ChevronLeft, ChevronRight, ChevronDown, LayoutGrid, List, Columns, MessageCircle, Search, Lock } from 'lucide-react';
 import WidgetPreview from '@/components/widget-preview';
 
 const LAYOUTS = [
@@ -19,13 +19,40 @@ const TEMPLATES = [
   { id: 'minimal', name: 'Minimal', description: 'Clean border style' },
   { id: 'darkElegant', name: 'Dark Elegant', description: 'Dark sophisticated' },
   { id: 'gradientBorder', name: 'Gradient Border', description: 'Violet gradient edges' },
+  { id: 'neon', name: 'Neon', description: 'Glowing neon accents' },
+  { id: 'aurora', name: 'Aurora', description: 'Pastel violet-to-indigo gradient, frosted feel' },
+  { id: 'spotlight', name: 'Spotlight', description: 'White card, strong single-side shadow' },
+  { id: 'classic', name: 'Classic', description: 'Traditional bordered, professional look' },
+  { id: 'warm', name: 'Warm', description: 'Cream background, warm subtle shadows' },
 ];
+
+const FONT_OPTIONS = [
+  'Auto-detect', 'Inter', 'Plus Jakarta Sans', 'Geist', 'Roboto', 'Open Sans', 'Lato',
+];
+
+const SHADOW_OPTIONS = ['None', 'Soft', 'Medium', 'Strong'];
+
+interface PlaceResult {
+  placeId: string;
+  name: string;
+  address: string;
+}
 
 export default function NewWidgetPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Places search state
+  const [placeQuery, setPlaceQuery] = useState('');
+  const [placeResults, setPlaceResults] = useState<PlaceResult[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
+  const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [config, setConfig] = useState({
     name: '',
@@ -35,7 +62,57 @@ export default function NewWidgetPage() {
     minRating: 1,
     animations: true,
     placeId: '',
+    primaryColor: '#7C3AED',
+    fontFamily: 'Auto-detect',
+    borderRadius: 12,
+    shadowIntensity: 'Soft',
+    cardSpacing: 16,
+    removeBranding: false,
   });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowPlaceDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchPlaces = useCallback(async (query: string) => {
+    if (query.trim().length < 2) {
+      setPlaceResults([]);
+      setShowPlaceDropdown(false);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/places/search?q=${encodeURIComponent(query)}`);
+      const data: PlaceResult[] = await res.json();
+      setPlaceResults(data);
+      setShowPlaceDropdown(data.length > 0);
+    } catch {
+      setPlaceResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  const handlePlaceQueryChange = (value: string) => {
+    setPlaceQuery(value);
+    setSelectedPlace(null);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => searchPlaces(value), 300);
+  };
+
+  const handleSelectPlace = (place: PlaceResult) => {
+    setSelectedPlace(place);
+    setPlaceQuery(place.name);
+    setConfig({ ...config, placeId: place.placeId });
+    setShowPlaceDropdown(false);
+  };
 
   const handleSubmit = async () => {
     if (!config.name.trim()) {
@@ -233,20 +310,173 @@ export default function NewWidgetPage() {
                   </div>
                 </div>
 
-                {/* Google Place ID */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Google Place ID</label>
-                  <input
-                    type="text"
-                    placeholder="ChIJ..."
-                    value={config.placeId}
-                    onChange={(e) => setConfig({ ...config, placeId: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                  />
+                {/* Business Search */}
+                <div className="space-y-2" ref={dropdownRef}>
+                  <label className="text-sm font-medium text-slate-300">Search Your Business</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                      type="text"
+                      placeholder="Search by business name or address..."
+                      value={placeQuery}
+                      onChange={(e) => handlePlaceQueryChange(e.target.value)}
+                      onFocus={() => placeResults.length > 0 && setShowPlaceDropdown(true)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                    />
+                    {isSearching && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                    {showPlaceDropdown && placeResults.length > 0 && (
+                      <div className="absolute z-10 top-full mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden">
+                        {placeResults.map((place) => (
+                          <button
+                            key={place.placeId}
+                            onClick={() => handleSelectPlace(place)}
+                            className="w-full text-left px-4 py-3 hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0"
+                          >
+                            <div className="text-sm font-medium text-white">{place.name}</div>
+                            <div className="text-xs text-slate-400 mt-0.5">{place.address}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {selectedPlace && (
+                    <div className="flex items-center gap-2 text-xs text-emerald-400">
+                      <Check className="w-3 h-3" />
+                      <span>Selected: {selectedPlace.name}</span>
+                    </div>
+                  )}
                   <p className="text-xs text-slate-500">
-                    Leave empty for demo reviews. Find your Place ID at{' '}
-                    <span className="text-violet-400">Google Place ID Finder</span>.
+                    Search for your business to auto-fill the Google Place ID. Leave empty for demo reviews.
                   </p>
+                </div>
+
+                {/* Advanced Settings */}
+                <div>
+                  <button
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-400 transition-colors"
+                  >
+                    Advanced Settings <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {showAdvanced && (
+                    <div className="mt-4 space-y-6 p-5 rounded-xl bg-slate-800/50 border border-slate-700">
+                      {/* Primary Color */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Primary Color</label>
+                        <div className="flex gap-3">
+                          <input
+                            type="color"
+                            value={config.primaryColor}
+                            onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
+                            className="w-12 h-10 rounded-lg border border-slate-600 bg-transparent cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={config.primaryColor}
+                            onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
+                            className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-violet-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Font Family */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Font Family</label>
+                        <select
+                          value={config.fontFamily}
+                          onChange={(e) => setConfig({ ...config, fontFamily: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        >
+                          {FONT_OPTIONS.map((f) => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Card Border Radius */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">
+                          Card Border Radius: <span className="text-violet-400 font-semibold">{config.borderRadius}px</span>
+                        </label>
+                        <input
+                          type="range"
+                          min={0}
+                          max={24}
+                          value={config.borderRadius}
+                          onChange={(e) => setConfig({ ...config, borderRadius: parseInt(e.target.value) })}
+                          className="w-full accent-violet-600"
+                        />
+                        <div className="flex justify-between text-xs text-slate-600">
+                          <span>0px</span>
+                          <span>24px</span>
+                        </div>
+                      </div>
+
+                      {/* Shadow Intensity */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Shadow Intensity</label>
+                        <div className="flex gap-2">
+                          {SHADOW_OPTIONS.map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => setConfig({ ...config, shadowIntensity: s })}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                                config.shadowIntensity === s
+                                  ? 'border-violet-500 bg-violet-500/10 text-violet-300'
+                                  : 'border-slate-700 text-slate-500 hover:border-slate-600'
+                              }`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Card Spacing */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">
+                          Card Spacing: <span className="text-violet-400 font-semibold">{config.cardSpacing}px</span>
+                        </label>
+                        <input
+                          type="range"
+                          min={12}
+                          max={32}
+                          value={config.cardSpacing}
+                          onChange={(e) => setConfig({ ...config, cardSpacing: parseInt(e.target.value) })}
+                          className="w-full accent-violet-600"
+                        />
+                        <div className="flex justify-between text-xs text-slate-600">
+                          <span>12px</span>
+                          <span>32px</span>
+                        </div>
+                      </div>
+
+                      {/* Remove Branding */}
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700">
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="text-sm font-medium text-slate-300">Remove Vissar branding</div>
+                            <div className="text-xs text-slate-500">Hide &quot;Powered by Vissar&quot; text</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/20 text-violet-400 border border-violet-500/30">PRO</span>
+                          <button
+                            disabled
+                            className="relative w-12 h-7 rounded-full bg-slate-600 cursor-not-allowed opacity-60"
+                          >
+                            <Lock className="absolute top-1.5 left-1.5 w-4 h-4 text-slate-400" />
+                            <div className="absolute top-0.5 translate-x-0.5 w-6 h-6 rounded-full bg-white shadow" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -415,7 +645,14 @@ function TemplateSwatch({ templateId }: { templateId: string }) {
     minimal: 'bg-white border-2 border-slate-300',
     darkElegant: 'bg-slate-800 border border-slate-600',
     gradientBorder: 'bg-white border-2 border-violet-500',
+    neon: 'bg-slate-900 border border-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.4)]',
+    aurora: 'bg-gradient-to-br from-violet-200/60 to-indigo-200/60 border border-violet-300/50',
+    spotlight: 'bg-white shadow-[4px_4px_12px_rgba(0,0,0,0.15)] border border-slate-100',
+    classic: 'bg-white border-2 border-slate-400',
+    warm: 'bg-amber-50 border border-amber-200/60 shadow-sm',
   };
+
+  const isDark = templateId === 'darkElegant' || templateId === 'neon';
 
   return (
     <div className={`w-14 h-10 rounded-lg ${swatchStyles[templateId] || swatchStyles.soft}`}>
@@ -425,8 +662,8 @@ function TemplateSwatch({ templateId }: { templateId: string }) {
             <div key={i} className="w-1 h-1 rounded-full bg-amber-400" />
           ))}
         </div>
-        <div className={`h-0.5 w-8 rounded ${templateId === 'darkElegant' ? 'bg-slate-600' : 'bg-slate-200'}`} />
-        <div className={`h-0.5 w-6 rounded ${templateId === 'darkElegant' ? 'bg-slate-600' : 'bg-slate-200'}`} />
+        <div className={`h-0.5 w-8 rounded ${isDark ? 'bg-slate-600' : 'bg-slate-200'}`} />
+        <div className={`h-0.5 w-6 rounded ${isDark ? 'bg-slate-600' : 'bg-slate-200'}`} />
       </div>
     </div>
   );
