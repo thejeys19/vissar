@@ -111,22 +111,38 @@
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
-                {[
-                    { name: "Truffle Pasta", price: "$32", desc: "Fresh tagliatelle with black truffle" },
-                    { name: "Osso Buco", price: "$48", desc: "Braised veal shank with gremolata" },
-                    { name: "Branzino", price: "$42", desc: "Mediterranean sea bass, lemon herb" }
-                ].map((item, i) => (
-                    <div key={i} class="bg-white p-8 text-center group hover:shadow-lg transition-shadow">
-                        <div class="aspect-square bg-stone-200 mb-6 group-hover:scale-105 transition-transform">
-                            <div class="w-full h-full flex items-center justify-center">
-                                <span class="text-stone-400">[Dish Image]</span>
-                            </div>
+                <div class="bg-white p-8 text-center group hover:shadow-lg transition-shadow">
+                    <div class="aspect-square bg-stone-200 mb-6 group-hover:scale-105 transition-transform">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="text-stone-400">[Dish Image]</span>
                         </div>
-                        <h3 class="text-2xl font-serif font-semibold mb-2">{item.name}</h3>
-                        <p class="text-stone-500 text-sm mb-3">{item.desc}</p>
-                        <p class="text-lg font-semibold">{item.price}</p>
                     </div>
-                ))}
+                    <h3 class="text-2xl font-serif font-semibold mb-2">Truffle Pasta</h3>
+                    <p class="text-stone-500 text-sm mb-3">Fresh tagliatelle with black truffle</p>
+                    <p class="text-lg font-semibold">$32</p>
+                </div>
+
+                <div class="bg-white p-8 text-center group hover:shadow-lg transition-shadow">
+                    <div class="aspect-square bg-stone-200 mb-6 group-hover:scale-105 transition-transform">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="text-stone-400">[Dish Image]</span>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-serif font-semibold mb-2">Osso Buco</h3>
+                    <p class="text-stone-500 text-sm mb-3">Braised veal shank with gremolata</p>
+                    <p class="text-lg font-semibold">$48</p>
+                </div>
+
+                <div class="bg-white p-8 text-center group hover:shadow-lg transition-shadow">
+                    <div class="aspect-square bg-stone-200 mb-6 group-hover:scale-105 transition-transform">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="text-stone-400">[Dish Image]</span>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-serif font-semibold mb-2">Branzino</h3>
+                    <p class="text-stone-500 text-sm mb-3">Mediterranean sea bass, lemon herb</p>
+                    <p class="text-lg font-semibold">$42</p>
+                </div>
             </div>
         </div>
     </section>
@@ -165,9 +181,10 @@
                     </p>
                 </div>
 
-                {['Menu', 'Reservations', 'Gift Cards', 'Careers'].map(item => (
-                    <a key={item} href="#" class="block hover:text-white transition-colors">{item}</a>
-                ))}
+                <a href="#" class="block hover:text-white transition-colors">Menu</a>
+                <a href="#" class="block hover:text-white transition-colors">Reservations</a>
+                <a href="#" class="block hover:text-white transition-colors">Gift Cards</a>
+                <a href="#" class="block hover:text-white transition-colors">Careers</a>
             </div>
 
             <div class="border-t border-stone-800 pt-8 text-sm text-center">
@@ -177,6 +194,6 @@
     </footer>
 
     <!-- Vissar Widget Script -->
-    <script src="https://vissar.vercel.app/widget/vissar-widget.min.js" async></script>
+    <script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>
 </body>
 </html>

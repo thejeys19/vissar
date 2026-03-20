@@ -96,35 +96,39 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
-            {[
-                {
-                    icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,
-                    title: "Lightning Fast",
-                    desc: "Process thousands of tasks in seconds with our optimized engine."
-                },
-                {
-                    icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>,
-                    title: "Enterprise Security",
-                    desc: "Bank-level encryption and compliance with SOC 2, GDPR, HIPAA."
-                },
-                {
-                    icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
-                    title: "99.9% Uptime",
-                    desc: "Reliable infrastructure with automatic failover and backups."
-                }
-            ].map((feature, i) => (
-                <div key={i} class="p-8 bg-slate-800/50 border border-slate-700 rounded-2xl hover:border-slate-600 transition-colors">
-                    <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-400">
-                        {feature.icon}
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">{feature.title}</h3>
-                    <p class="text-slate-400">{feature.desc}</p>
+            <div class="p-8 bg-slate-800/50 border border-slate-700 rounded-2xl hover:border-slate-600 transition-colors">
+                <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
                 </div>
-            ))}
+                <h3 class="text-xl font-semibold mb-3">Lightning Fast</h3>
+                <p class="text-slate-400">Process thousands of tasks in seconds with our optimized engine.</p>
+            </div>
+
+            <div class="p-8 bg-slate-800/50 border border-slate-700 rounded-2xl hover:border-slate-600 transition-colors">
+                <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Enterprise Security</h3>
+                <p class="text-slate-400">Bank-level encryption and compliance with SOC 2, GDPR, HIPAA.</p>
+            </div>
+
+            <div class="p-8 bg-slate-800/50 border border-slate-700 rounded-2xl hover:border-slate-600 transition-colors">
+                <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">99.9% Uptime</h3>
+                <p class="text-slate-400">Reliable infrastructure with automatic failover and backups.</p>
+            </div>
         </div>
     </section>
 
-    <!-- Vissar Reviews Section -->
+    <!-- Reviews Section with Vissar -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 border-t border-slate-800">
         <div class="max-w-4xl mx-auto">
             <div class="text-center mb-12">
@@ -156,6 +160,6 @@
     </section>
 
     <!-- Vissar Widget Script -->
-    <script src="https://vissar.vercel.app/widget/vissar-widget.min.js" async></script>
+    <script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>
 </body>
 </html>
