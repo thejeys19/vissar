@@ -30,8 +30,11 @@ export async function POST(request: Request) {
     const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
     const usageKey = `${widgetId}:${monthKey}`;
 
+    // Log tracking data (for analytics)
+    console.log('Track:', { widgetId, timestamp, url, referrer });
+
     // Get or create usage record
-    let usage = usageStore.get(usageKey) || {
+    const usage = usageStore.get(usageKey) || {
       count: 0,
       tier: widget.tier || 'free',
       limit: widget.tier === 'free' ? 200 : widget.tier === 'pro' ? 10000 : Infinity

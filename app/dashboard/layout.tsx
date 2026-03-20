@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Plus, Settings, CreditCard, LogOut } from "lucide-react";
 
 export default async function DashboardLayout({

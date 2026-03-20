@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { WidgetContainer } from "@/components/widget-container";
-import { Palette, Zap, LayoutGrid, Shield, SlidersHorizontal, CreditCard, Check } from "lucide-react";
+import { Palette, Zap, LayoutGrid, Shield, SlidersHorizontal, CreditCard } from "lucide-react";
 
 export default function LandingPage() {
   return (
