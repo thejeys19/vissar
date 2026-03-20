@@ -7,7 +7,7 @@ import { Palette, Zap, LayoutGrid, Shield, SlidersHorizontal, CreditCard } from 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
-      <!-- Header -->
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-violet-100/80 bg-white/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
@@ -39,7 +39,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <!-- Hero -->
+      {/* Hero */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-50/80 via-white to-purple-50/60" />
@@ -99,7 +99,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <!-- Demo Section -->
+      {/* Demo Section */}
       <section id="demo" className="py-24 bg-slate-950 relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -150,7 +150,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <!-- Features -->
+      {/* Features */}
       <section id="features" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -222,7 +222,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <!-- Footer -->
+      {/* Footer */}
       <footer className="py-12 bg-slate-950 border-t border-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">

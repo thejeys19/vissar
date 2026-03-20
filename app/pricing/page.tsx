@@ -62,7 +62,7 @@ const plans = [
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-      <!-- Header -->
+      {/* Header */}
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function PricingPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <!-- Hero -->
+        {/* Hero */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
             Simple, transparent pricing
@@ -88,7 +88,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <!-- Pricing Cards -->
+        {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
@@ -143,7 +143,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <!-- Grand Opening Banner -->
+        {/* Grand Opening Banner */}
         <div className="mt-16 max-w-3xl mx-auto">
           <div className="bg-gradient-to-r from-violet-600 to-purple-600 rounded-2xl p-8 text-center text-white">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 rounded-full text-sm font-medium mb-4">
@@ -161,7 +161,7 @@ export default function PricingPage() {
           </div>
         </div>
 
-        <!-- FAQ -->
+        {/* FAQ */}
         <div className="mt-20 max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold text-slate-900 text-center mb-8">Frequently Asked Questions</h2>
           
