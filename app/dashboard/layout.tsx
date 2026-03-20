@@ -1,22 +1,43 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Plus, Settings, CreditCard, LogOut } from "lucide-react";
+import { LayoutDashboard, Plus, Settings, CreditCard, LogOut, User } from "lucide-react";
+
+// Demo user for when auth is not configured
+const demoUser = {
+  name: "Demo User",
+  email: "demo@vissar.app",
+  initial: "D"
+};
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  let session = null;
+  let isDemoMode = false;
 
-  if (!session) {
-    redirect("/auth/signin");
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    // Auth not configured - use demo mode
+    isDemoMode = true;
   }
+
+  const user = session?.user || (isDemoMode ? demoUser : null);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center">
+          <p className="text-sm text-amber-400">
+            Demo Mode — <Link href="/landing" className="underline hover:text-amber-300">Sign in</Link> to save your widgets
+          </p>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800">
         <div className="p-6">
@@ -66,22 +87,26 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800/30">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
               <span className="text-white text-sm font-medium">
-                {session.user?.name?.[0] || session.user?.email?.[0] || "U"}
+                {user?.name?.[0] || user?.email?.[0] || "U"}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{session.user?.name || session.user?.email}</p>
+              <p className="text-sm font-medium truncate">{user?.name || user?.email}</p>
               <p className="text-xs text-slate-500">Free Plan</p>
             </div>
-            <Link href="/api/auth/signout">
-              <LogOut className="w-4 h-4 text-slate-500 hover:text-slate-300" />
-            </Link>
+            {session ? (
+              <Link href="/api/auth/signout">
+                <LogOut className="w-4 h-4 text-slate-500 hover:text-slate-300" />
+              </Link>
+            ) : (
+              <User className="w-4 h-4 text-slate-500" />
+            )}
           </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="ml-64">
+      <main className={`ml-64 ${isDemoMode ? 'pt-10' : ''}`}>
         <div className="p-8">
           {children}
         </div>
