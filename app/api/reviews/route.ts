@@ -8,8 +8,13 @@ const GOOGLE_PLACES_API_URL = 'https://places.googleapis.com/v1/places';
 const CACHE_DIR = '/tmp/vissar-cache';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+interface ReviewData {
+  business: { name: string; rating: number; totalReviews: number; placeId: string };
+  reviews: { id: string; author: string; avatar: string; rating: number; text: string; date: string; relativeTime?: string }[];
+}
+
 interface CacheEntry {
-  data: Record<string, unknown>;
+  data: ReviewData;
   cachedAt: string;
 }
 
@@ -28,7 +33,7 @@ async function readCache(placeId: string): Promise<CacheEntry | null> {
   }
 }
 
-async function writeCache(placeId: string, data: Record<string, unknown>): Promise<void> {
+async function writeCache(placeId: string, data: ReviewData): Promise<void> {
   try {
     await mkdir(CACHE_DIR, { recursive: true });
     const filePath = path.join(CACHE_DIR, `${placeId}.json`);
@@ -138,7 +143,7 @@ export async function GET(request: Request) {
   const maxReviews = parseInt(searchParams.get('maxReviews') || '5', 10);
   const minRating = parseInt(searchParams.get('minRating') || '1', 10);
 
-  let data;
+  let data: ReviewData;
 
   // Try to fetch real Google reviews if API key is set and not using mock
   if (placeId !== 'mock' && GOOGLE_PLACES_API_KEY) {
@@ -150,7 +155,7 @@ export async function GET(request: Request) {
       const googleData = await fetchGoogleReviews(placeId);
       if (googleData) {
         data = googleData;
-        await writeCache(placeId, googleData as unknown as Record<string, unknown>);
+        await writeCache(placeId, googleData);
       } else {
         // Fallback to mock data
         data = {
