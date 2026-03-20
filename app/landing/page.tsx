@@ -206,7 +206,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <!-- CTA Section -->
+      {/* CTA Section */}
       <section className="py-24 bg-slate-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-violet-900/50 to-purple-900/50" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
