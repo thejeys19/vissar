@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { stripe, isStripeConfigured } from '@/lib/stripe';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(request: Request) {
   try {
+    if (!isStripeConfigured) {
+      return NextResponse.json(
+        { error: 'Stripe not configured' },
+        { status: 500 }
+      );
+    }
+
     const payload = await request.text();
     const signature = request.headers.get('stripe-signature');
 
@@ -32,7 +39,7 @@ export async function POST(request: Request) {
       }
       
       case 'invoice.payment_failed': {
-        const invoice = event.data.object;
+        const invoice = event.data.object as { subscription?: string };
         console.log(`Payment failed for subscription: ${invoice.subscription}`);
         break;
       }

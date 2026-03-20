@@ -197,7 +197,7 @@ export default function NewWidgetPage() {
                       <Label>Max Reviews: {config.maxReviews}</Label>
                       <Slider
                         value={[config.maxReviews]}
-                        onValueChange={([value]) => setConfig({ ...config, maxReviews: value })}
+                        onValueChange={(value) => setConfig({ ...config, maxReviews: (value as number[])[0] })}
                         min={1}
                         max={20}
                         className="py-4"
@@ -260,7 +260,7 @@ export default function NewWidgetPage() {
                       <Label>Border Radius: {config.borderRadius}px</Label>
                       <Slider
                         value={[config.borderRadius]}
-                        onValueChange={([value]) => setConfig({ ...config, borderRadius: value })}
+                        onValueChange={(value) => setConfig({ ...config, borderRadius: (value as number[])[0] })}
                         min={0}
                         max={50}
                       />
@@ -270,7 +270,7 @@ export default function NewWidgetPage() {
                       <Label>Shadow Intensity: {config.shadowIntensity}%</Label>
                       <Slider
                         value={[config.shadowIntensity]}
-                        onValueChange={([value]) => setConfig({ ...config, shadowIntensity: value })}
+                        onValueChange={(value) => setConfig({ ...config, shadowIntensity: (value as number[])[0] })}
                         min={0}
                         max={100}
                       />
@@ -280,7 +280,7 @@ export default function NewWidgetPage() {
                       <Label>Card Spacing: {config.spacing}px</Label>
                       <Slider
                         value={[config.spacing]}
-                        onValueChange={([value]) => setConfig({ ...config, spacing: value })}
+                        onValueChange={(value) => setConfig({ ...config, spacing: (value as number[])[0] })}
                         min={10}
                         max={50}
                       />

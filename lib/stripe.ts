@@ -1,13 +1,20 @@
 import Stripe from 'stripe';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-12-18.acacia',
-});
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+
+export const stripe = stripeKey 
+  ? new Stripe(stripeKey, {
+      apiVersion: '2026-02-25.clover',
+    })
+  : null as unknown as Stripe;
+
+export const isStripeConfigured = !!stripeKey;
 
 export const PLANS = {
   free: {
     id: 'free',
     name: 'Free',
+    priceId: null,
     price: 0,
     widgets: 1,
     views: 200,

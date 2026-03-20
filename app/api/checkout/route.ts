@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
-import { stripe, PLANS } from '@/lib/stripe';
+import { stripe, PLANS, isStripeConfigured } from '@/lib/stripe';
 
 export async function POST(request: Request) {
   try {
+    if (!isStripeConfigured) {
+      return NextResponse.json(
+        { error: 'Stripe not configured' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { planId, userId, email } = body;
 
@@ -15,17 +22,10 @@ export async function POST(request: Request) {
 
     const plan = PLANS[planId as keyof typeof PLANS];
     
-    if (!plan || planId === 'free') {
+    if (!plan || planId === 'free' || !plan.priceId) {
       return NextResponse.json(
         { error: 'Invalid plan' },
         { status: 400 }
-      );
-    }
-
-    if (!plan.priceId) {
-      return NextResponse.json(
-        { error: 'Price not configured' },
-        { status: 500 }
       );
     }
 
