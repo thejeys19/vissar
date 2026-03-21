@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/components/checkout-button";
 import { Check, Zap, Crown, Sparkles } from "lucide-react";
@@ -65,7 +66,7 @@ const plans = [
   },
 ];
 
-export default function PricingPage() {
+function PricingContent() {
   const searchParams = useSearchParams();
   const success = searchParams.get("success") === "true";
   const canceled = searchParams.get("canceled") === "true";
@@ -233,5 +234,13 @@ export default function PricingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <PricingContent />
+    </Suspense>
   );
 }

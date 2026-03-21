@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getWidget } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 const usageStore = new Map();
 
 export async function GET(request: Request) {
