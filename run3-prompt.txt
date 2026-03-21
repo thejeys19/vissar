@@ -1,0 +1,78 @@
+Implement Stripe webhook + account tier system for Vissar. PROJECT: /Users/jey/.openclaw/agents/DYNAMO/workspace/vissar/dashboard
+
+## TASK 1: Stripe Webhook Handler
+
+File: app/api/webhook/route.ts already exists. Read it first, then upgrade it to:
+- Verify Stripe webhook signature using STRIPE_WEBHOOK_SECRET env var
+- Handle events:
+  - checkout.session.completed: mark user as paid, set their plan to pro/business
+  - customer.subscription.deleted: downgrade user to free
+  - customer.subscription.updated: update plan accordingly
+- For now, store plan in a simple in-memory Map keyed by email (real DB in Run 4)
+- Export a getUserPlan(email) function from this module
+- Return 200 for all handled events, 400 for unknown
+
+Also create app/api/user/plan/route.ts:
+export const dynamic = "force-dynamic";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) return Response.json({ plan: "free" });
+  // Return the user plan (from in-memory store or default free)
+  return Response.json({ plan: "free", views: 147, limit: 200 });
+}
+
+## TASK 2: Usage-Based Upgrade Prompts
+
+Create components/upgrade-prompt.tsx - a banner component:
+- Shows when user is at 80%+ of their view limit
+- "You have used X of Y views this month. Upgrade to Pro for 10,000 views."
+- Violet gradient bg, dismiss button, upgrade CTA
+- Used in dashboard/page.tsx
+
+## TASK 3: QR Code Generator
+
+Create app/dashboard/qr/page.tsx:
+- Input: Google review URL (auto-filled from widget placeId if available)
+- Generates QR code using qrcode.react or a pure-CSS/SVG approach
+- Actually use: fetch from https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={url}
+- Shows QR code image with download button
+- Instructions: "Print this and place it at your counter to get more reviews"
+- Dark themed, clean layout
+
+## TASK 4: Email Widget (Static HTML Export)
+
+Create app/api/widget/[id]/email/route.ts:
+- Returns a static HTML email-safe version of the widget (no JS)
+- Just top 3 reviews as simple HTML table with inline styles
+- Stars as unicode (★★★★★)
+- Author name + review text
+- "View all reviews" link at bottom
+- Content-Type: text/html
+- This is the "email newsletter" embed feature
+
+## TASK 5: Review Request Page (stub)
+
+Create app/dashboard/review-request/page.tsx:
+- "Get More Reviews" page
+- Shows the business Google review URL (https://search.google.com/local/writereview?placeid={placeId})
+- QR code from the above API
+- Copy link button
+- Instructions for sharing (WhatsApp, Email, SMS templates)
+- "Coming soon: automated review request emails" (Pro feature teaser)
+
+## TASK 6: Homepage improvements
+
+File: app/landing/page.tsx
+
+Add a "Pricing" section at the bottom of the landing page (before footer) that shows the 3 plans inline. Import and use CheckoutButton from @/components/checkout-button for Pro and Business. Keep the dedicated /pricing page but also show plans on homepage.
+
+Add an "Integrations" section with platform logos:
+- Shopify, Webflow, WordPress, Wix, Squarespace, Framer, Notion, any website
+- Show as a clean icon grid with names below
+- "Works on any platform" heading
+- Dark section
+
+## AFTER ALL TASKS:
+cd /Users/jey/.openclaw/agents/DYNAMO/workspace/vissar/dashboard && git add -A && git commit -m "Run 3: Stripe webhook, upgrade prompts, QR generator, email widget, review request page, homepage integrations" && git push && openclaw system event --text "Run 3 complete: Stripe webhook handler, upgrade prompts, QR code generator, email widget export, review request page, homepage integrations section" --mode now

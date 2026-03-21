@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Eye, MousePointer, Sparkles } from "lucide-react";
-
 export default function DashboardPage() {
   return (
     <div className="space-y-8">
@@ -21,7 +20,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <Card className="bg-slate-900 border-slate-800">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">

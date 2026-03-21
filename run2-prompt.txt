@@ -1,0 +1,96 @@
+Major upgrade to the Vissar dashboard. Work through ALL tasks completely. Do not stop. Commit after each major section.
+
+PROJECT: /Users/jey/.openclaw/agents/DYNAMO/workspace/vissar/dashboard
+
+## TASK 1: Full Responsive Dashboard Layout
+
+Read app/dashboard/layout.tsx first. Then:
+
+- Add responsive sidebar: full on desktop (lg:w-64), icon-only on tablet (md:w-16), hidden on mobile
+- Add mobile bottom tab bar (fixed, visible only on mobile sm:flex hidden)  
+- Add hamburger state with useState for mobile drawer
+- Main content: ml-0 sm:ml-16 lg:ml-64 with transition
+- Import Image from next/image, use /logo-icon.png for logo
+
+## TASK 2: Analytics Dashboard
+
+Create app/dashboard/analytics/page.tsx with:
+- "Analytics" heading, subtitle
+- 4 stat cards: Total Views (1,247), This Month (847), Growth (+36%), Best Widget
+- CSS-only bar chart for last 7 days (Mon-Sun) using div heights, no external chart lib
+- Per-widget table: name, views, clicks, CTR%
+- All dark themed (bg-slate-900 cards, slate-950 bg)
+
+Create app/api/analytics/route.ts:
+export const dynamic = "force-dynamic";
+export async function GET() {
+  return Response.json({
+    totalViews: 1247, thisMonth: 847, lastMonth: 621, growth: 36.4,
+    daily: [
+      { date: "Mon", views: 89 }, { date: "Tue", views: 134 },
+      { date: "Wed", views: 112 }, { date: "Thu", views: 201 },
+      { date: "Fri", views: 178 }, { date: "Sat", views: 67 }, { date: "Sun", views: 66 }
+    ],
+    widgets: [
+      { id: "w1", name: "Main Site Widget", views: 623, clicks: 41, ctr: 6.6 },
+      { id: "w2", name: "Homepage Reviews", views: 224, clicks: 18, ctr: 8.0 }
+    ]
+  });
+}
+
+Add Analytics link to dashboard sidebar in layout.tsx (import BarChart2 from lucide-react).
+
+## TASK 3: Billing Page
+
+Create app/dashboard/billing/page.tsx:
+- Current plan card: "Free Plan" with features list
+- Usage meter: "147 / 200 views this month" with violet progress bar
+- Upgrade section: Pro ($8/mo) and Business ($15/mo) cards with CheckoutButton
+- Import CheckoutButton from @/components/checkout-button
+- Bottom: plan comparison table (Free vs Pro vs Business features)
+- All dark themed
+
+## TASK 4: Settings Page
+
+Create app/dashboard/settings/page.tsx:
+- Profile card: shows email from session (use getServerSession), name field
+- Notifications card: checkboxes (UI only) for email alerts
+- API Access card: shows "API key available on Pro plan" with locked state for free users
+- Danger Zone card: red border, Delete Account button (UI only, no backend)
+- Dark themed, clean card layout
+
+## TASK 5: 404 Page
+
+Create app/not-found.tsx:
+- Dark bg-slate-950 background
+- Large "404" text in violet gradient
+- "Page not found" heading
+- Two buttons: "Go Home" (href="/") and "Open Dashboard" (href="/dashboard")  
+- Vissar logo at top using Image component
+
+## TASK 6: Loading States
+
+Create app/loading.tsx:
+- Dark bg-slate-950, centered spinner (CSS animate-spin circle)
+- "Loading..." text in slate-400
+
+Create app/dashboard/loading.tsx:
+- Same style but with "ml-64" offset matching dashboard layout
+
+## TASK 7: Improve app/page.tsx
+
+Read the current app/page.tsx. If it just redirects to /landing, change it to:
+import { redirect } from "next/navigation";
+export default function RootPage() { redirect("/landing"); }
+
+Make sure /landing route works (app/landing/page.tsx exists - it does).
+
+## TASK 8: Improve dashboard/page.tsx responsiveness
+
+Read app/dashboard/page.tsx. Make sure:
+- Stats grid is responsive: grid-cols-1 sm:grid-cols-3
+- Widget cards are responsive
+- Empty state shows if no widgets with Create Widget CTA button
+
+## AFTER ALL TASKS:
+cd /Users/jey/.openclaw/agents/DYNAMO/workspace/vissar/dashboard && git add -A && git commit -m "Dashboard upgrades: responsive layout, analytics, billing, settings, 404, loading states" && git push && openclaw system event --text "Run 2 complete: analytics dashboard, billing page, settings, responsive layout, 404 page, loading states all live" --mode now

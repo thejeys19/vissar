@@ -609,6 +609,40 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Integrations */}
+      <section className="py-24 bg-slate-950 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Integrations</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Works on any platform</h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">Paste one script tag and you&apos;re live. No plugins, no build steps, no dependencies.</p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6">
+            {[
+              { name: "Shopify", icon: "S" },
+              { name: "Webflow", icon: "W" },
+              { name: "WordPress", icon: "WP" },
+              { name: "Wix", icon: "Wx" },
+              { name: "Squarespace", icon: "Sq" },
+              { name: "Framer", icon: "Fr" },
+              { name: "Notion", icon: "N" },
+              { name: "Any Website", icon: "</>" },
+            ].map((platform) => (
+              <div key={platform.name} className="flex flex-col items-center gap-3 group">
+                <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:border-violet-500/50 group-hover:bg-slate-800/80 transition-all duration-300">
+                  <span className="text-slate-300 font-bold text-lg group-hover:text-violet-400 transition-colors">{platform.icon}</span>
+                </div>
+                <span className="text-sm text-slate-400 font-medium">{platform.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-24 bg-slate-950 relative overflow-hidden">
         <div className="absolute inset-0">
