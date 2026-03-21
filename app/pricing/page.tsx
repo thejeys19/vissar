@@ -1,11 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { CheckoutButton } from "@/components/checkout-button";
 import { Check, Zap, Crown, Sparkles } from "lucide-react";
 
 const plans = [
   {
     name: "Free",
+    planId: null as null,
     price: "$0",
     period: "/month",
     description: "Perfect for trying out Vissar",
@@ -23,6 +28,7 @@ const plans = [
   },
   {
     name: "Pro",
+    planId: "pro" as const,
     price: "$8",
     period: "/month",
     description: "Premium design for growing businesses",
@@ -36,11 +42,11 @@ const plans = [
       "Priority email support",
     ],
     cta: "Start Pro Trial",
-    href: "/widget/new",
     popular: true,
   },
   {
     name: "Business",
+    planId: "business" as const,
     price: "$15",
     period: "/month",
     description: "For agencies & high-traffic sites",
@@ -55,12 +61,15 @@ const plans = [
       "API access",
     ],
     cta: "Start Business Trial",
-    href: "/widget/new",
     popular: false,
   },
 ];
 
 export default function PricingPage() {
+  const searchParams = useSearchParams();
+  const success = searchParams.get("success") === "true";
+  const canceled = searchParams.get("canceled") === "true";
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
       {/* Header */}
@@ -77,6 +86,18 @@ export default function PricingPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        {/* Success/Canceled Banners */}
+        {success && (
+          <div className="mb-8 rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-center text-emerald-800 font-medium">
+            🎉 You are now on the Pro plan!
+          </div>
+        )}
+        {canceled && (
+          <div className="mb-8 rounded-lg bg-amber-50 border border-amber-200 p-4 text-center text-amber-800 font-medium">
+            Checkout canceled.
+          </div>
+        )}
+
         {/* Hero */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
@@ -128,16 +149,29 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <Button
-                asChild
-                className={`w-full ${
-                  plan.popular
-                    ? "bg-violet-600 hover:bg-violet-700 text-white"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-900"
-                }`}
-              >
-                <Link href={plan.href}>{plan.cta}</Link>
-              </Button>
+              {plan.planId ? (
+                <CheckoutButton
+                  planId={plan.planId}
+                  className={`w-full ${
+                    plan.popular
+                      ? "bg-violet-600 hover:bg-violet-700 text-white"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-900"
+                  }`}
+                >
+                  {plan.cta}
+                </CheckoutButton>
+              ) : (
+                <Button
+                  asChild
+                  className={`w-full ${
+                    plan.popular
+                      ? "bg-violet-600 hover:bg-violet-700 text-white"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-900"
+                  }`}
+                >
+                  <Link href={plan.href!}>{plan.cta}</Link>
+                </Button>
+              )}
             </div>
           ))}
         </div>
@@ -151,7 +185,7 @@ export default function PricingPage() {
             </div>
             <h3 className="text-2xl font-bold mb-2">Lifetime Access — $75</h3>
             <p className="text-violet-100 mb-6">
-              One-time payment. 3 widgets, 10K views/month forever. 
+              One-time payment. 3 widgets, 10K views/month forever.
               Only 200 spots available.
             </p>
             <Button asChild className="bg-white text-violet-700 hover:bg-slate-100">
@@ -163,7 +197,7 @@ export default function PricingPage() {
         {/* FAQ */}
         <div className="mt-20 max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold text-slate-900 text-center mb-8">Frequently Asked Questions</h2>
-          
+
           <div className="space-y-6">
             {[
               {

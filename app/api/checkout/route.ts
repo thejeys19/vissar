@@ -37,9 +37,9 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      mode: planId === 'lifetime' ? 'payment' : 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/pricing?canceled=true`,
+      mode: 'subscription',
+      success_url: `${process.env.NEXT_PUBLIC_URL || "https://vissar.vercel.app"}/pricing?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL || "https://vissar.vercel.app"}/pricing?canceled=true`,
       metadata: {
         userId,
         planId,

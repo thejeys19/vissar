@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { SessionProvider } from "@/components/session-provider";
 
 const plusJakarta = Plus_Jakarta_Sans({ 
   subsets: ["latin"], 
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", plusJakarta.variable)}>
       <body className={`${plusJakarta.variable} antialiased`}>
-        {children}
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

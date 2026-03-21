@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CheckoutButton } from "@/components/checkout-button";
 import Image from "next/image";
 import { Star, Check, ArrowRight, Zap, Shield, LayoutGrid, Palette, SlidersHorizontal, Globe } from "lucide-react";
 
@@ -26,6 +29,7 @@ const features = [
 const plans = [
   {
     name: "Free",
+    planId: null as null,
     price: "$0",
     period: "/month",
     description: "Try it out, no card needed",
@@ -36,22 +40,22 @@ const plans = [
   },
   {
     name: "Pro",
+    planId: "pro" as const,
     price: "$8",
     period: "/month",
     description: "The full Vissar experience",
     features: ["3 widgets", "10,000 views/month", "All 10+ templates", "Animations & effects", "No Vissar branding", "Priority support"],
     cta: "Start Free Trial",
-    href: "/widget/new",
     highlight: true,
   },
   {
     name: "Business",
+    planId: "business" as const,
     price: "$15",
     period: "/month",
     description: "For agencies & high-traffic sites",
     features: ["9 widgets", "50,000 views/month", "All templates", "Custom CSS", "No branding", "API access", "Priority support"],
     cta: "Start Free Trial",
-    href: "/widget/new",
     highlight: false,
   },
 ];
@@ -461,16 +465,29 @@ export default function LandingPage() {
                   ))}
                 </ul>
 
-                <Button
-                  asChild
-                  className={`w-full h-11 font-semibold ${
-                    plan.highlight
-                      ? "bg-white text-violet-700 hover:bg-violet-50"
-                      : "bg-violet-600 text-white hover:bg-violet-700"
-                  }`}
-                >
-                  <Link href={plan.href}>{plan.cta}</Link>
-                </Button>
+                {plan.planId ? (
+                  <CheckoutButton
+                    planId={plan.planId}
+                    className={`w-full h-11 font-semibold ${
+                      plan.highlight
+                        ? "bg-white text-violet-700 hover:bg-violet-50"
+                        : "bg-violet-600 text-white hover:bg-violet-700"
+                    }`}
+                  >
+                    {plan.cta}
+                  </CheckoutButton>
+                ) : (
+                  <Button
+                    asChild
+                    className={`w-full h-11 font-semibold ${
+                      plan.highlight
+                        ? "bg-white text-violet-700 hover:bg-violet-50"
+                        : "bg-violet-600 text-white hover:bg-violet-700"
+                    }`}
+                  >
+                    <Link href={plan.href!}>{plan.cta}</Link>
+                  </Button>
+                )}
               </div>
             ))}
           </div>

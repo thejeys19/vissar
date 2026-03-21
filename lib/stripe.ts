@@ -24,19 +24,18 @@ export const PLANS = {
     id: 'pro',
     name: 'Pro',
     priceId: process.env.STRIPE_PRO_PRICE_ID,
-    price: 500, // $5 in cents
-    widgets: Infinity,
+    price: 800, // $8 in cents
+    widgets: 3,
     views: 10000,
-    features: ['Unlimited widgets', '10,000 views/month', 'All templates', 'No branding', 'Priority support']
+    features: ['3 widgets', '10,000 views/month', 'All templates', 'No branding', 'Priority support']
   },
-  lifetime: {
-    id: 'lifetime',
-    name: 'Lifetime',
-    priceId: process.env.STRIPE_LIFETIME_PRICE_ID,
-    price: 5000, // $50 in cents (was $399)
-    widgets: Infinity,
-    views: Infinity,
-    maxLocations: 10,
-    features: ['Unlimited widgets', 'Unlimited views', 'All templates + future', 'No branding', 'Lifetime access', 'Max 10 locations']
+  business: {
+    id: 'business',
+    name: 'Business',
+    priceId: process.env.STRIPE_BUSINESS_PRICE_ID,
+    price: 1500, // $15 in cents
+    widgets: 9,
+    views: 50000,
+    features: ['9 widgets', '50,000 views/month', 'All templates', 'Custom CSS', 'No branding', 'API access', 'Priority support']
   }
 };
