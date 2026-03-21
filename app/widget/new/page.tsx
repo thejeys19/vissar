@@ -7,10 +7,15 @@ import { Check, Copy, ChevronLeft, ChevronRight, ChevronDown, LayoutGrid, List, 
 import WidgetPreview from '@/components/widget-preview';
 
 const LAYOUTS = [
-  { value: 'carousel', label: 'Carousel', description: 'Sliding cards', icon: Columns },
-  { value: 'grid', label: 'Grid', description: '2-column grid', icon: LayoutGrid },
-  { value: 'list', label: 'List', description: 'Vertical stack', icon: List },
-  { value: 'badge', label: 'Badge', description: 'Floating widget', icon: MessageCircle },
+  { value: 'carousel', label: 'Carousel', description: 'Sliding cards', icon: Columns, emoji: null },
+  { value: 'grid', label: 'Grid', description: '2-column grid', icon: LayoutGrid, emoji: null },
+  { value: 'list', label: 'List', description: 'Vertical stack', icon: List, emoji: null },
+  { value: 'badge', label: 'Badge', description: 'Floating widget', icon: MessageCircle, emoji: null },
+  { value: 'marquee', label: 'Marquee', description: 'Auto-scrolling ticker', icon: null, emoji: '⟶' },
+  { value: 'masonry', label: 'Masonry', description: 'Pinterest-style grid', icon: null, emoji: '⊟' },
+  { value: 'wall', label: 'Wall of Love', description: 'Dense review mosaic', icon: null, emoji: '❤' },
+  { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: null, emoji: '◎' },
+  { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: null, emoji: '★' },
 ];
 
 const TEMPLATES = [
@@ -68,6 +73,19 @@ export default function NewWidgetPage() {
     shadowIntensity: 'Soft',
     cardSpacing: 16,
     removeBranding: false,
+    // New options
+    showHeader: false,
+    showHighlights: false,
+    showVerifiedBadge: true,
+    showAvatar: true,
+    showDate: true,
+    sortBy: 'newest',
+    textLength: 150,
+    colorScheme: 'auto',
+    animationStyle: 'slideUp',
+    starColor: '#F59E0B',
+    pinnedReviews: '',
+    keywords: '',
   });
 
   // Close dropdown when clicking outside
@@ -145,6 +163,17 @@ export default function NewWidgetPage() {
   data-vissar-max-reviews="${config.maxReviews}"
   data-vissar-min-rating="${config.minRating}"
   data-vissar-animations="${config.animations}"${config.placeId ? `\n  data-vissar-place-id="${config.placeId}"` : ''}
+  data-vissar-animation-style="${config.animationStyle}"
+  data-vissar-color-scheme="${config.colorScheme}"
+  data-vissar-sort-by="${config.sortBy}"
+  data-vissar-text-length="${config.textLength}"
+  data-vissar-show-header="${config.showHeader}"
+  data-vissar-show-highlights="${config.showHighlights}"
+  data-vissar-show-verified-badge="${config.showVerifiedBadge}"
+  data-vissar-show-avatar="${config.showAvatar}"
+  data-vissar-show-date="${config.showDate}"
+  data-vissar-star-color="${config.starColor}"
+  data-vissar-primary-color="${config.primaryColor}"${config.keywords ? `\n  data-vissar-keywords="${config.keywords}"` : ''}${config.pinnedReviews ? `\n  data-vissar-pinned-reviews="${config.pinnedReviews}"` : ''}
 ></div>
 
 <script src="https://vissar.vercel.app/widget/vissar-widget.min.js" async></script>`;
@@ -238,7 +267,7 @@ export default function NewWidgetPage() {
                 {/* Layout Selector - Visual Cards */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-slate-300">Layout</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     {LAYOUTS.map((l) => {
                       const Icon = l.icon;
                       const isSelected = config.layout === l.value;
@@ -257,7 +286,7 @@ export default function NewWidgetPage() {
                               isSelected ? 'bg-violet-600 text-white' : 'bg-slate-700 text-slate-400'
                             }`}
                           >
-                            <Icon className="w-5 h-5" />
+                            {Icon ? <Icon className="w-5 h-5" /> : <span className="text-lg">{l.emoji}</span>}
                           </div>
                           <div>
                             <div className={`font-medium text-sm ${isSelected ? 'text-white' : 'text-slate-300'}`}>
@@ -475,6 +504,99 @@ export default function NewWidgetPage() {
                           </button>
                         </div>
                       </div>
+
+                      {/* Star Color */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Star Color</label>
+                        <div className="flex gap-3">
+                          <input
+                            type="color"
+                            value={config.starColor}
+                            onChange={(e) => setConfig({ ...config, starColor: e.target.value })}
+                            className="w-12 h-10 rounded-lg border border-slate-600 bg-transparent cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={config.starColor}
+                            onChange={(e) => setConfig({ ...config, starColor: e.target.value })}
+                            className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-violet-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Sort By */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Sort Reviews By</label>
+                        <select
+                          value={config.sortBy}
+                          onChange={(e) => setConfig({ ...config, sortBy: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        >
+                          <option value="newest">Newest First</option>
+                          <option value="highest">Highest Rated</option>
+                          <option value="lowest">Lowest Rated</option>
+                          <option value="longest">Longest Reviews</option>
+                        </select>
+                      </div>
+
+                      {/* Text Length */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">
+                          Text Length: <span className="text-violet-400 font-semibold">{config.textLength} chars</span>
+                        </label>
+                        <input
+                          type="range"
+                          min={50}
+                          max={300}
+                          value={config.textLength}
+                          onChange={(e) => setConfig({ ...config, textLength: parseInt(e.target.value) })}
+                          className="w-full accent-violet-600"
+                        />
+                        <div className="flex justify-between text-xs text-slate-600">
+                          <span>50</span>
+                          <span>300</span>
+                        </div>
+                      </div>
+
+                      {/* Show/Hide Toggles */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-medium text-slate-300">Show / Hide Elements</label>
+                        {[
+                          { key: 'showAvatar', label: 'Show Avatar' },
+                          { key: 'showDate', label: 'Show Date' },
+                          { key: 'showVerifiedBadge', label: 'Verified Badge' },
+                          { key: 'showHighlights', label: 'AI Highlights' },
+                        ].map((toggle) => (
+                          <div key={toggle.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700">
+                            <span className="text-sm text-slate-300">{toggle.label}</span>
+                            <button
+                              onClick={() => setConfig({ ...config, [toggle.key]: !config[toggle.key as keyof typeof config] })}
+                              className={`relative w-12 h-7 rounded-full transition-colors ${
+                                config[toggle.key as keyof typeof config] ? 'bg-violet-600' : 'bg-slate-600'
+                              }`}
+                            >
+                              <div
+                                className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                                  config[toggle.key as keyof typeof config] ? 'translate-x-5' : 'translate-x-0.5'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Keywords Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Keyword Filter</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. fast, professional, friendly"
+                          value={config.keywords}
+                          onChange={(e) => setConfig({ ...config, keywords: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        />
+                        <p className="text-xs text-slate-500">Comma-separated. Only show reviews containing these words.</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -526,6 +648,72 @@ export default function NewWidgetPage() {
                       );
                     })}
                   </div>
+                </div>
+
+                {/* Animation Style */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-slate-300">Animation Style</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: 'none', label: 'None', desc: 'No animation' },
+                      { value: 'fadeIn', label: 'Fade In', desc: 'Smooth opacity' },
+                      { value: 'slideUp', label: 'Slide Up', desc: 'Rise from below' },
+                      { value: 'scaleIn', label: 'Scale In', desc: 'Grow into view' },
+                    ].map((anim) => (
+                      <button
+                        key={anim.value}
+                        onClick={() => setConfig({ ...config, animationStyle: anim.value })}
+                        className={`p-3 rounded-xl border-2 text-left transition-all ${
+                          config.animationStyle === anim.value
+                            ? 'border-violet-500 bg-violet-500/10'
+                            : 'border-slate-700 hover:border-slate-600 bg-slate-800/50'
+                        }`}
+                      >
+                        <div className={`text-sm font-medium ${config.animationStyle === anim.value ? 'text-white' : 'text-slate-300'}`}>{anim.label}</div>
+                        <div className="text-xs text-slate-500">{anim.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Color Scheme */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-slate-300">Color Scheme</label>
+                  <div className="flex gap-2">
+                    {['auto', 'light', 'dark'].map((scheme) => (
+                      <button
+                        key={scheme}
+                        onClick={() => setConfig({ ...config, colorScheme: scheme })}
+                        className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium capitalize transition-all ${
+                          config.colorScheme === scheme
+                            ? 'border-violet-500 bg-violet-500/10 text-violet-300'
+                            : 'border-slate-700 text-slate-500 hover:border-slate-600'
+                        }`}
+                      >
+                        {scheme}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Show Header Toggle */}
+                <div className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+                  <div>
+                    <div className="text-sm font-medium text-slate-300">Business Header</div>
+                    <div className="text-xs text-slate-500">Show business name &amp; overall rating above widget</div>
+                  </div>
+                  <button
+                    onClick={() => setConfig({ ...config, showHeader: !config.showHeader })}
+                    className={`relative w-12 h-7 rounded-full transition-colors ${
+                      config.showHeader ? 'bg-violet-600' : 'bg-slate-600'
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                        config.showHeader ? 'translate-x-5' : 'translate-x-0.5'
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {/* Animations Toggle */}

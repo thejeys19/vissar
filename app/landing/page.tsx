@@ -118,7 +118,7 @@ export default function LandingPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
                 </span>
-                Now in Beta — Free to get started
+                New layouts just dropped — Free to get started
               </div>
 
               <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.08] mb-6">
@@ -155,7 +155,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <StarRating />
-                  <p className="text-sm text-slate-500 mt-0.5">Loved by <strong className="text-slate-700">500+</strong> businesses</p>
+                  <p className="text-sm text-slate-500 mt-0.5">Trusted by <strong className="text-slate-700">500+</strong> businesses</p>
                 </div>
               </div>
 
@@ -287,6 +287,119 @@ export default function LandingPage() {
                 </div>
                 <h3 className="font-bold text-lg text-slate-900 mb-2">{feature.title}</h3>
                 <p className="text-slate-500 leading-relaxed text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* New Layouts Showcase */}
+      <section className="py-24 bg-slate-950 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">New Layouts</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">5 powerful new ways to display reviews</h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">From scrolling tickers to cinematic spotlights. Pick the layout that fits your vibe.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Marquee */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-slate-800 rounded-xl p-4 mb-4 overflow-hidden h-24 flex items-center">
+                  <div className="flex gap-3 animate-pulse">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="flex-shrink-0 bg-slate-700 rounded-lg px-4 py-2 flex items-center gap-2">
+                        <div className="flex gap-0.5">{[1,2,3,4,5].map(s=><div key={s} className="w-1.5 h-1.5 rounded-full bg-amber-400"/>)}</div>
+                        <div className="h-2 w-12 bg-slate-600 rounded"/>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Marquee</h3>
+                <p className="text-xs text-slate-500">Auto-scrolling horizontal ticker</p>
+              </div>
+            </Link>
+
+            {/* Masonry */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-slate-800 rounded-xl p-3 mb-4 h-24" style={{columnCount: 2, columnGap: '8px'}}>
+                  <div className="bg-slate-700 rounded-lg p-2 mb-2 break-inside-avoid"><div className="h-2 w-full bg-slate-600 rounded mb-1"/><div className="h-2 w-3/4 bg-slate-600 rounded"/></div>
+                  <div className="bg-slate-700 rounded-lg p-2 mb-2 break-inside-avoid"><div className="h-2 w-full bg-slate-600 rounded mb-1"/><div className="h-2 w-full bg-slate-600 rounded mb-1"/><div className="h-2 w-1/2 bg-slate-600 rounded"/></div>
+                  <div className="bg-slate-700 rounded-lg p-2 mb-2 break-inside-avoid"><div className="h-2 w-full bg-slate-600 rounded"/></div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Masonry</h3>
+                <p className="text-xs text-slate-500">Pinterest-style staggered grid</p>
+              </div>
+            </Link>
+
+            {/* Wall of Love */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-slate-800 rounded-xl p-3 mb-4 h-24 grid grid-cols-4 gap-1.5">
+                  {Array.from({length: 8}).map((_, i) => (
+                    <div key={i} className="bg-slate-700 rounded p-1.5">
+                      <div className="flex gap-0.5 mb-1">{[1,2,3].map(s=><div key={s} className="w-1 h-1 rounded-full bg-amber-400"/>)}</div>
+                      <div className="h-1 w-full bg-slate-600 rounded"/>
+                    </div>
+                  ))}
+                </div>
+                <h3 className="font-semibold text-white text-sm">Wall of Love</h3>
+                <p className="text-xs text-slate-500">Dense mosaic of compact reviews</p>
+              </div>
+            </Link>
+
+            {/* Spotlight */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-slate-800 rounded-xl p-4 mb-4 h-24 flex flex-col items-center justify-center text-center">
+                  <span className="text-2xl text-violet-400 font-serif leading-none mb-1">&ldquo;</span>
+                  <div className="h-2 w-3/4 bg-slate-600 rounded mb-1.5"/>
+                  <div className="h-2 w-1/2 bg-slate-600 rounded mb-2"/>
+                  <div className="flex gap-0.5">{[1,2,3,4,5].map(s=><div key={s} className="w-2 h-2 rounded-full bg-amber-400"/>)}</div>
+                </div>
+                <h3 className="font-semibold text-white text-sm">Spotlight</h3>
+                <p className="text-xs text-slate-500">One cinematic featured review</p>
+              </div>
+            </Link>
+
+            {/* Summary */}
+            <Link href="/widget/new" className="group">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="bg-slate-800 rounded-xl p-4 mb-4 h-24 flex flex-col justify-center">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl font-bold text-white">4.9</span>
+                    <div className="flex gap-0.5">{[1,2,3,4,5].map(s=><div key={s} className="w-2.5 h-2.5 rounded-full bg-amber-400"/>)}</div>
+                  </div>
+                  {[5,4,3].map(n => (
+                    <div key={n} className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-[9px] text-slate-500 w-3">{n}</span>
+                      <div className="flex-1 h-1 bg-slate-700 rounded-full overflow-hidden"><div className="h-full bg-amber-400 rounded-full" style={{width: n===5?'80%':n===4?'14%':'4%'}}/></div>
+                    </div>
+                  ))}
+                </div>
+                <h3 className="font-semibold text-white text-sm">Summary</h3>
+                <p className="text-xs text-slate-500">Aggregate rating overview card</p>
+              </div>
+            </Link>
+          </div>
+
+          {/* Why teams choose Vissar stats */}
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: "⚡", text: "Under 30KB" },
+              { icon: "🎨", text: "10+ Templates" },
+              { icon: "⭐", text: "Auto-matches your brand" },
+              { icon: "🔒", text: "No cookies" },
+            ].map((stat) => (
+              <div key={stat.text} className="text-center p-4 rounded-xl bg-slate-800/50 border border-slate-800">
+                <span className="text-2xl mb-1 block">{stat.icon}</span>
+                <p className="text-sm font-medium text-slate-300">{stat.text}</p>
               </div>
             ))}
           </div>
