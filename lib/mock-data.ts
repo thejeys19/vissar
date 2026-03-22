@@ -6,6 +6,7 @@ export const MOCK_REVIEWS = [
     rating: 5,
     text: 'Absolutely incredible experience! The attention to detail and quality of service exceeded all my expectations. I\'ve been a customer for over 2 years now and they consistently deliver excellence.',
     date: '2026-03-10',
+    ownerReply: { text: 'Thank you so much, Sarah! Your kind words mean the world to us. We look forward to seeing you again!', date: '2026-03-11' },
   },
   {
     id: 'r2',
