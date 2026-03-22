@@ -2,7 +2,9 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
-const PLANS_PATH = join(process.cwd(), 'data', 'plans.json');
+// Use /tmp on Vercel (writable), fall back to data/ locally
+const DATA_DIR = process.env.VERCEL ? '/tmp/vissar-data' : join(process.cwd(), 'data');
+const PLANS_PATH = join(DATA_DIR, 'plans.json');
 
 interface UserPlan {
   plan: string;
@@ -13,7 +15,7 @@ interface UserPlan {
 
 async function ensureFile() {
   try {
-    await fs.mkdir(join(process.cwd(), 'data'), { recursive: true });
+    await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.access(PLANS_PATH);
   } catch {
     await fs.writeFile(PLANS_PATH, JSON.stringify({}));

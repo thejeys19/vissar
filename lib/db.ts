@@ -4,8 +4,10 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
-const DB_PATH = join(process.cwd(), 'data', 'widgets.json');
-const USERS_PATH = join(process.cwd(), 'data', 'users.json');
+// Use /tmp on Vercel (writable), fall back to data/ locally
+const DATA_DIR = process.env.VERCEL ? '/tmp/vissar-data' : join(process.cwd(), 'data');
+const DB_PATH = join(DATA_DIR, 'widgets.json');
+const USERS_PATH = join(DATA_DIR, 'users.json');
 
 export interface Widget {
   id: string;
@@ -36,7 +38,7 @@ export interface User {
 
 async function ensureDbExists() {
   try {
-    await fs.mkdir(join(process.cwd(), 'data'), { recursive: true });
+    await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.access(DB_PATH);
   } catch {
     await fs.writeFile(DB_PATH, JSON.stringify([]));
