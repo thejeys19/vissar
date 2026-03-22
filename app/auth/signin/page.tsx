@@ -56,9 +56,9 @@ export default function SignInPage() {
 
           <p className="text-center text-sm text-slate-500 mt-6">
             By signing in, you agree to our{" "}
-            <Link href="#" className="text-violet-400 hover:text-violet-300">Terms of Service</Link>
+            <Link href="/terms" className="text-violet-400 hover:text-violet-300">Terms of Service</Link>
             {" "}and{" "}
-            <Link href="#" className="text-violet-400 hover:text-violet-300">Privacy Policy</Link>
+            <Link href="/privacy" className="text-violet-400 hover:text-violet-300">Privacy Policy</Link>
           </p>
         </div>
 
