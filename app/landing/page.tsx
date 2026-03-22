@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/components/checkout-button";
 import Image from "next/image";
 import { Star, Check, ArrowRight, Zap, Shield, LayoutGrid, Palette, SlidersHorizontal, Globe, Timer, Sparkles, Lock } from "lucide-react";
+import LiveDemo from "@/components/live-demo";
 
 const reviews = [
   { 
@@ -99,6 +102,15 @@ function StarRating({ count = 5 }: { count?: number }) {
 }
 
 export default function LandingPage() {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) {
+      document.cookie = `vissar_ref=${encodeURIComponent(ref)};path=/;max-age=${60 * 60 * 24 * 30};SameSite=Lax`;
+    }
+  }, [searchParams]);
+
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
 
@@ -251,37 +263,16 @@ export default function LandingPage() {
 
       {/* Demo Section */}
       <section id="demo" className="py-24 bg-slate-950 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.015]"
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}
-        />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-violet-600/10 rounded-full blur-3xl" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Live Demo</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Matches any website design</h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">One widget, infinite looks. Vissar reads your site and adapts automatically.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">See it live. Right now.</h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">Toggle layouts and styles below — this is the actual Vissar widget running live.</p>
           </div>
 
-          {/* Lifestyle shots */}
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            <div className="group relative rounded-2xl overflow-hidden aspect-[4/3]">
-              <Image src="/lifestyle-desk.png" alt="Vissar on desktop" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <span className="text-xs font-semibold text-violet-400 uppercase tracking-widest">Dashboard View</span>
-                <p className="text-white font-semibold text-lg mt-1">Manage all your widgets in one place</p>
-              </div>
-            </div>
-            <div className="group relative rounded-2xl overflow-hidden aspect-[4/3]">
-              <Image src="/lifestyle-phone-v2.png" alt="Vissar on mobile" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <span className="text-xs font-semibold text-violet-400 uppercase tracking-widest">Mobile Ready</span>
-                <p className="text-white font-semibold text-lg mt-1">Looks perfect on every device</p>
-              </div>
-            </div>
-          </div>
+          <LiveDemo />
 
           {/* Stats row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

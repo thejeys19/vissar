@@ -22,6 +22,8 @@ const LAYOUTS = [
   { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: Star },
   { value: 'popup', label: 'Popup Button', description: 'Floating button → modal', icon: MessageCircle },
   { value: 'quote', label: 'Single Quote', description: 'Rotating hero quote', icon: MessageCircle },
+  { value: 'comparison', label: 'Side-by-Side', description: 'Two reviews, editorial feel', icon: Columns },
+  { value: 'mobile-stack', label: 'Mobile Stack', description: 'Single column, mobile-optimized', icon: List },
 ];
 
 const TEMPLATES = [
@@ -131,6 +133,8 @@ export default function NewWidgetPage() {
     dateRange: 'all',
     blacklist: '',
     showSentimentBadges: true,
+    showReplies: true,
+    gdprMode: false,
   });
 
   // Load existing widget if editing
@@ -240,7 +244,7 @@ export default function NewWidgetPage() {
 
   const widgetSlug = widgetId || config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget';
 
-  const shortCode = `<div data-vissar-widget="${widgetSlug}" data-vissar-layout="${config.layout}" data-vissar-max-reviews="${config.maxReviews}"${config.injectSchema ? ' data-vissar-schema="true"' : ''}></div>\n<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
+  const shortCode = `<div data-vissar-widget="${widgetSlug}" data-vissar-layout="${config.layout}" data-vissar-max-reviews="${config.maxReviews}"${config.injectSchema ? ' data-vissar-schema="true"' : ''}${!config.showReplies ? ' data-vissar-show-replies="false"' : ''}${config.gdprMode ? ' data-vissar-gdpr="true"' : ''}></div>\n<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
 
   const embedCode = `<!-- Vissar Reviews Widget -->
 <div
@@ -260,7 +264,7 @@ export default function NewWidgetPage() {
   data-vissar-show-avatar="${config.showAvatar}"
   data-vissar-show-date="${config.showDate}"
   data-vissar-star-color="${config.starColor}"
-  data-vissar-primary-color="${config.primaryColor}"${config.keywords ? `\n  data-vissar-keywords="${config.keywords}"` : ''}${config.pinnedReviews ? `\n  data-vissar-pinned-reviews="${config.pinnedReviews}"` : ''}${config.injectSchema ? '\n  data-vissar-schema="true"' : ''}${config.removeBranding ? '\n  data-vissar-remove-branding="true"' : ''}${config.language && config.language !== 'all' ? `\n  data-vissar-language="${config.language}"` : ''}${config.dateRange && config.dateRange !== 'all' ? `\n  data-vissar-date-range="${config.dateRange}"` : ''}${config.blacklist ? `\n  data-vissar-blacklist="${config.blacklist}"` : ''}${config.showSentimentBadges === false ? '\n  data-vissar-sentiment-badges="false"' : ''}
+  data-vissar-primary-color="${config.primaryColor}"${config.keywords ? `\n  data-vissar-keywords="${config.keywords}"` : ''}${config.pinnedReviews ? `\n  data-vissar-pinned-reviews="${config.pinnedReviews}"` : ''}${config.injectSchema ? '\n  data-vissar-schema="true"' : ''}${config.removeBranding ? '\n  data-vissar-remove-branding="true"' : ''}${config.language && config.language !== 'all' ? `\n  data-vissar-language="${config.language}"` : ''}${config.dateRange && config.dateRange !== 'all' ? `\n  data-vissar-date-range="${config.dateRange}"` : ''}${config.blacklist ? `\n  data-vissar-blacklist="${config.blacklist}"` : ''}${config.showSentimentBadges === false ? '\n  data-vissar-sentiment-badges="false"' : ''}${!config.showReplies ? '\n  data-vissar-show-replies="false"' : ''}${config.gdprMode ? '\n  data-vissar-gdpr="true"' : ''}
 ></div>
 
 <script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
@@ -604,6 +608,24 @@ export default function NewWidgetPage() {
                         </div>
                       </div>
 
+                      {/* GDPR Privacy Mode */}
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700">
+                        <div>
+                          <div className="text-sm font-medium text-slate-300">GDPR Privacy Mode</div>
+                          <div className="text-xs text-slate-500">Anonymizes reviewer names and removes avatars</div>
+                        </div>
+                        <button
+                          onClick={() => setConfig({ ...config, gdprMode: !config.gdprMode })}
+                          className={`relative w-12 h-7 rounded-full transition-colors ${
+                            config.gdprMode ? 'bg-violet-600' : 'bg-slate-600'
+                          }`}
+                        >
+                          <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                            config.gdprMode ? 'translate-x-5' : 'translate-x-0.5'
+                          }`} />
+                        </button>
+                      </div>
+
                       {/* Star Color */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-300">Star Color</label>
@@ -667,6 +689,7 @@ export default function NewWidgetPage() {
                           { key: 'showHighlights', label: 'AI Highlights' },
                           { key: 'injectSchema', label: 'Google Rich Snippets (SERP stars)' },
                           { key: 'showSentimentBadges', label: 'Sentiment Badges (Top/Detailed/Recent)' },
+                          { key: 'showReplies', label: 'Owner Replies' },
                         ].map((toggle) => (
                           <div key={toggle.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700">
                             <span className="text-sm text-slate-300">{toggle.label}</span>

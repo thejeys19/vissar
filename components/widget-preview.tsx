@@ -543,6 +543,58 @@ export default function WidgetPreview({
         </div>
       )}
 
+      {layout === 'comparison' && reviews.length >= 2 && (
+        <div className="grid grid-cols-2" style={gapStyle}>
+          {reviews.slice(0, 2).map((review, i) => (
+            <div key={i} className="flex flex-col items-center text-center">
+              <span
+                className="text-4xl font-serif leading-none mb-2"
+                style={{ color: primaryColor, opacity: 0.5 }}
+              >
+                &ldquo;
+              </span>
+              <ReviewCard
+                review={review}
+                template={template}
+                shadowIntensity={shadowIntensity}
+                borderRadius={borderRadius}
+                showAvatar={showAvatar}
+                showDate={showDate}
+                starColor={starColor}
+                animationStyle={animationStyle}
+                animations={animations}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {layout === 'mobile-stack' && (
+        <div className="flex flex-col max-w-md mx-auto" style={gapStyle}>
+          {reviews.slice(0, 3).map((review, i) => (
+            <div
+              key={i}
+              className={`p-6 transition-all duration-200 hover:shadow-xl ${getCardClasses(template, shadowIntensity, borderRadius)} ${getAnimationClass(animationStyle, animations)}`}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                {showAvatar && (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-base font-semibold shrink-0">
+                    {review.initials}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className={`font-semibold text-base ${getTextClasses(template).name}`}>{review.name}</div>
+                  <div className={`text-sm ${getTextClasses(template).role}`}>{review.role}</div>
+                </div>
+              </div>
+              <Stars rating={review.rating} starColor={starColor} />
+              <p className={`text-base mt-3 leading-relaxed ${getTextClasses(template).body}`}>{review.text}</p>
+              {showDate && <div className={`text-sm mt-4 ${getTextClasses(template).date}`}>{review.date}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Write a Review CTA */}
       {showWriteReview && (
         <div className="mt-5 flex justify-center">

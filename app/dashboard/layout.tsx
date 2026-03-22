@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
-import { LayoutDashboard, Plus, Settings, CreditCard, BarChart2, Menu, X, LogOut } from "lucide-react";
+import { LayoutDashboard, Plus, Settings, CreditCard, BarChart2, Menu, X, LogOut, Users, Layers, Gift, Plug } from "lucide-react";
 
 const navLinks = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -12,6 +12,10 @@ const navLinks = [
   { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
   { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
+  { href: "/dashboard/clients", icon: Users, label: "Clients" },
+  { href: "/dashboard/bulk", icon: Layers, label: "Bulk Create" },
+  { href: "/dashboard/referral", icon: Gift, label: "Referral" },
+  { href: "/dashboard/integrations", icon: Plug, label: "Integrations" },
 ];
 
 function LogoText({ className = "" }: { className?: string }) {

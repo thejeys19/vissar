@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface CheckoutButtonProps {
-  planId: "pro" | "business";
+  planId: "pro" | "business" | "lifetime";
   className?: string;
   children: React.ReactNode;
 }

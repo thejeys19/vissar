@@ -40,6 +40,12 @@ export default async function BillingPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {/* Lifetime Deal Banner */}
+      <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-500/30 rounded-xl px-5 py-3 flex items-center gap-3">
+        <span className="text-xl">🔥</span>
+        <p className="text-amber-200 text-sm font-medium">Limited time: Lifetime deal available — scroll down to grab it</p>
+      </div>
+
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-white">Billing</h1>
         <p className="text-slate-400 mt-1">Manage your plan and usage</p>
@@ -129,6 +135,33 @@ export default async function BillingPage() {
           </div>
         </div>
       )}
+
+      {/* Lifetime Deal */}
+      <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 border border-amber-500/30 rounded-xl p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-xl">🔥</span>
+          <h2 className="text-xl font-bold text-white">Lifetime Deal</h2>
+        </div>
+        <div className="flex items-baseline gap-2 mt-2 mb-4">
+          <span className="text-4xl font-bold text-white">$149</span>
+          <span className="text-slate-400">one-time payment</span>
+        </div>
+        <p className="text-amber-200/80 text-sm mb-5">Everything in Pro, forever. No monthly fees, no renewals.</p>
+        <ul className="space-y-2 mb-6">
+          {["10,000 views/month", "3 widgets", "All layouts & templates", "No branding", "Priority support", "Lifetime updates"].map((f) => (
+            <li key={f} className="flex items-center gap-2 text-slate-300 text-sm">
+              <Check className="w-4 h-4 text-amber-400 shrink-0" />
+              {f}
+            </li>
+          ))}
+        </ul>
+        <CheckoutButton
+          planId="lifetime"
+          className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold"
+        >
+          Get Lifetime Access
+        </CheckoutButton>
+      </div>
 
       {/* Comparison Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
