@@ -74,8 +74,9 @@ export default function NewWidgetPage() {
     shadowIntensity: 'Soft',
     cardSpacing: 16,
     removeBranding: false,
-    // New options
     showHeader: false,
+    headerText: '',
+    showWriteReview: false,
     showHighlights: false,
     showVerifiedBadge: true,
     showAvatar: true,
@@ -695,23 +696,76 @@ export default function NewWidgetPage() {
                   </div>
                 </div>
 
-                {/* Show Header Toggle */}
+                {/* Custom Section Heading */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium text-slate-300">Section Heading</div>
+                      <div className="text-xs text-slate-500">Add a custom headline above your reviews</div>
+                    </div>
+                    <button
+                      onClick={() => setConfig({ ...config, showHeader: !config.showHeader })}
+                      className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
+                        config.showHeader ? 'bg-violet-600' : 'bg-slate-600'
+                      }`}
+                    >
+                      <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${config.showHeader ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    </button>
+                  </div>
+                  {config.showHeader && (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        placeholder="See what our customers are saying"
+                        value={config.headerText}
+                        onChange={(e) => setConfig({ ...config, headerText: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all text-sm"
+                        maxLength={80}
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        {["See what our customers are saying", "Don't just take our word for it", "Real reviews from real customers", "Trusted by our clients"].map((preset) => (
+                          <button
+                            key={preset}
+                            onClick={() => setConfig({ ...config, headerText: preset })}
+                            className="text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 hover:border-violet-500 hover:text-violet-300 transition-all"
+                          >
+                            {preset}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Write a Review Button */}
                 <div className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 border border-slate-700">
                   <div>
-                    <div className="text-sm font-medium text-slate-300">Business Header</div>
+                    <div className="text-sm font-medium text-slate-300">Write a Review Button</div>
+                    <div className="text-xs text-slate-500">Links visitors directly to your Google review page</div>
+                  </div>
+                  <button
+                    onClick={() => setConfig({ ...config, showWriteReview: !config.showWriteReview })}
+                    className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
+                      config.showWriteReview ? 'bg-violet-600' : 'bg-slate-600'
+                    }`}
+                  >
+                    <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${config.showWriteReview ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </button>
+                </div>
+
+                {/* Show Header Toggle - existing */}
+                <div className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+                  <div>
+                    <div className="text-sm font-medium text-slate-300">Business Header Bar</div>
                     <div className="text-xs text-slate-500">Show business name &amp; overall rating above widget</div>
                   </div>
                   <button
                     onClick={() => setConfig({ ...config, showHeader: !config.showHeader })}
-                    className={`relative w-12 h-7 rounded-full transition-colors ${
+                    className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
                       config.showHeader ? 'bg-violet-600' : 'bg-slate-600'
                     }`}
                   >
-                    <div
-                      className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
-                        config.showHeader ? 'translate-x-5' : 'translate-x-0.5'
-                      }`}
-                    />
+                    <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${config.showHeader ? 'translate-x-5' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
 
@@ -860,6 +914,9 @@ export default function NewWidgetPage() {
                   showDate={config.showDate}
                   starColor={config.starColor}
                   colorScheme={config.colorScheme}
+                  showHeader={config.showHeader}
+                  headerText={config.headerText}
+                  showWriteReview={config.showWriteReview}
                 />
               </div>
             </div>
