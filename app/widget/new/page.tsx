@@ -188,18 +188,18 @@ export default function NewWidgetPage() {
   const stepLabels = ['Configure', 'Style', 'Get Code'];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-10 h-10 rounded-xl" />
-            <span className="font-bold text-xl text-white">Create Widget</span>
+        <div className="w-full max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0">
+            <Image src="/logo-icon.png" alt="Vissar" width={36} height={36} className="w-9 h-9 rounded-xl shrink-0" />
+            <span className="font-bold text-lg text-white truncate">Create Widget</span>
           </Link>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main className="w-full max-w-7xl mx-auto px-4 py-6">
         {/* Step Indicator */}
         <div className="flex items-center justify-center mb-8">
           {stepLabels.map((label, i) => {
@@ -243,12 +243,12 @@ export default function NewWidgetPage() {
           })}
         </div>
 
-        <div className="grid lg:grid-cols-[1fr,1fr] gap-6 sm:gap-8">
+        <div className="grid lg:grid-cols-[1fr,1fr] gap-4 sm:gap-6">
           {/* Left Panel - Config */}
           <div className="space-y-6">
             {/* Step 1: Configure */}
             {step === 1 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 space-y-8">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-8 space-y-6">
                 <h2 className="text-xl font-semibold text-white">Configure Widget</h2>
 
                 {/* Widget Name */}
@@ -611,7 +611,7 @@ export default function NewWidgetPage() {
 
             {/* Step 2: Style */}
             {step === 2 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 space-y-8">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-8 space-y-6">
                 <h2 className="text-xl font-semibold text-white">Choose Style</h2>
 
                 {/* Template Picker */}
@@ -773,10 +773,10 @@ export default function NewWidgetPage() {
                       {isCopied ? <><Check className="w-3.5 h-3.5" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
                     </button>
                   </div>
-                  <div className="p-4 overflow-x-auto">
-                    <code className="text-sm text-green-400 font-mono whitespace-nowrap">
-                      {`<div id="vissar-${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}"></div>`}<br/>
-                      {`<script src="https://cdn.vissar.com/widget.js" data-widget="${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}" async></script>`}
+                  <div className="p-3 sm:p-4 overflow-x-auto">
+                    <code className="text-xs sm:text-sm text-green-400 font-mono">
+                      <span className="block break-all">{`<div id="vissar-${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}"></div>`}</span>
+                      <span className="block break-all mt-1">{`<script src="https://cdn.vissar.com/widget.js" data-widget="${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}" async></script>`}</span>
                     </code>
                   </div>
                 </div>
@@ -788,7 +788,7 @@ export default function NewWidgetPage() {
                     Advanced: show full config code
                   </summary>
                   <div className="mt-3 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
-                    <pre className="p-4 text-xs text-slate-400 font-mono overflow-x-auto leading-relaxed max-h-48 overflow-y-auto">
+                    <pre className="p-3 text-xs text-slate-400 font-mono overflow-x-auto leading-relaxed max-h-40 overflow-y-auto break-all whitespace-pre-wrap">
                       {embedCode}
                     </pre>
                   </div>
