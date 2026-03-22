@@ -1,19 +1,37 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getUserPlan } from '@/lib/plans';
+import { getUserPlanAsync, setUserPlan, planLimitForTier } from '@/lib/plans';
 
+// GET current plan
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
+  const plan = await getUserPlanAsync(session.user.email);
+  return NextResponse.json({ ...plan, email: session.user.email, name: session.user.name });
+}
+
+// POST to update plan (admin use or webhook)
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const body = await request.json();
+  const { plan, email } = body;
+
+  const targetEmail = email || session.user.email;
+
+  if (!['free', 'pro', 'business'].includes(plan)) {
+    return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
   }
-  const plan = getUserPlan(session.user.email);
-  return NextResponse.json({
-    plan: plan.plan,
-    views: plan.views,
-    limit: plan.limit,
-    email: session.user.email,
-    name: session.user.name,
+
+  const current = await getUserPlanAsync(targetEmail);
+  await setUserPlan(targetEmail, {
+    plan,
+    views: current.views,
+    limit: planLimitForTier(plan),
   });
+
+  return NextResponse.json({ success: true, plan, email: targetEmail });
 }

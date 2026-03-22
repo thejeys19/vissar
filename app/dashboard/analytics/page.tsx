@@ -2,14 +2,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getWidgetsByUser } from "@/lib/db";
-import { getUserPlan } from "@/lib/plans";
+import { getUserPlanAsync } from "@/lib/plans";
 
 export default async function AnalyticsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) redirect("/auth/signin");
 
   const userId = (session.user as { id?: string }).id || session.user.email;
-  const userPlan = getUserPlan(session.user.email);
+  const userPlan = await getUserPlanAsync(session.user.email);
   const widgets = await getWidgetsByUser(userId).catch(() => []);
 
   const totalViews = userPlan.views || 0;

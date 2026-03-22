@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getUserPlan } from "@/lib/plans";
+import { getUserPlanAsync } from "@/lib/plans";
 import { CheckoutButton } from "@/components/checkout-button";
 import { Check, X, CreditCard, Zap } from "lucide-react";
 
@@ -10,7 +10,7 @@ export default async function BillingPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) redirect("/auth/signin");
 
-  const userPlan = getUserPlan(session.user.email);
+  const userPlan = await getUserPlanAsync(session.user.email);
   const planName = userPlan.plan;
   const viewUsage = userPlan.views || 0;
   const viewLimit = userPlan.limit || 200;

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Eye, MousePointer, Sparkles, Code2 } from "lucide-react";
 import { getWidgetsByUser } from "@/lib/db";
-import { getUserPlan } from "@/lib/plans";
+import { getUserPlanAsync } from "@/lib/plans";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -16,7 +16,7 @@ export default async function DashboardPage() {
   }
 
   const userId = (session.user as { id?: string }).id || session.user.email;
-  const userPlan = getUserPlan(session.user.email);
+  const userPlan = await getUserPlanAsync(session.user.email);
   const widgets = await getWidgetsByUser(userId).catch(() => []);
   
   const planName = userPlan.plan.charAt(0).toUpperCase() + userPlan.plan.slice(1);

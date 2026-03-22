@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { stripe, isStripeConfigured } from '@/lib/stripe';
-import { setUserPlan, getUserPlan, planLimitForTier } from '@/lib/plans';
+import { setUserPlan, getUserPlanAsync, planLimitForTier } from '@/lib/plans';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
         const email = session.customer_email || session.metadata?.email;
         const plan = resolvePlan(session.metadata);
         if (email) {
-          const existing = getUserPlan(email);
-          setUserPlan(email, {
+          const existing = await getUserPlanAsync(email);
+          await setUserPlan(email, {
             plan,
             views: existing.views,
             limit: planLimitForTier(plan),
@@ -47,8 +47,8 @@ export async function POST(request: Request) {
         const email = sub.metadata?.email;
         const plan = resolvePlan(sub.metadata);
         if (email) {
-          const existing = getUserPlan(email);
-          setUserPlan(email, {
+          const existing = await getUserPlanAsync(email);
+          await setUserPlan(email, {
             plan,
             views: existing.views,
             limit: planLimitForTier(plan),
@@ -62,8 +62,8 @@ export async function POST(request: Request) {
         const sub = event.data.object;
         const email = sub.metadata?.email;
         if (email) {
-          const existing = getUserPlan(email);
-          setUserPlan(email, {
+          const existing = await getUserPlanAsync(email);
+          await setUserPlan(email, {
             plan: "free",
             views: existing.views,
             limit: 200,
