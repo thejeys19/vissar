@@ -90,7 +90,7 @@ export default async function AnalyticsPage() {
         </div>
         {widgets.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-sm">
-            No widgets yet. <a href="/widget/new" className="text-violet-400 hover:text-violet-300">Create your first widget</a>
+            No widgets yet. <a href="/dashboard/widget/new" className="text-violet-400 hover:text-violet-300">Create your first widget</a>
           </div>
         ) : (
           <div className="overflow-x-auto">

@@ -8,7 +8,7 @@ import { LayoutDashboard, Plus, Settings, CreditCard, BarChart2, Menu, X, LogOut
 
 const navLinks = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/widget/new", icon: Plus, label: "Create Widget" },
+  { href: "/dashboard/widget/new", icon: Plus, label: "Create Widget" },
   { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
   { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },

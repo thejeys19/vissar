@@ -44,7 +44,7 @@ export default async function DashboardPage() {
           </Button>
         ) : (
           <Button asChild className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shrink-0">
-            <Link href="/widget/new" className="flex items-center gap-2">
+            <Link href="/dashboard/widget/new" className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Create Widget</span>
               <span className="sm:hidden">Create</span>
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg sm:text-xl font-semibold text-white">Your Widgets</h2>
           {widgets.length > 0 && !atLimit && (
-            <Link href="/widget/new" className="text-sm text-violet-400 hover:text-violet-300 flex items-center gap-1">
+            <Link href="/dashboard/widget/new" className="text-sm text-violet-400 hover:text-violet-300 flex items-center gap-1">
               <Plus className="w-4 h-4" /> New
             </Link>
           )}
@@ -137,7 +137,7 @@ export default async function DashboardPage() {
         
         <div className="grid gap-4">
           {widgets.length === 0 ? (
-            <Link href="/widget/new">
+            <Link href="/dashboard/widget/new">
               <Card className="bg-slate-900/50 border-slate-800 border-dashed hover:bg-slate-900 hover:border-violet-500/50 transition-all cursor-pointer">
                 <CardContent className="p-8 sm:p-12">
                   <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
@@ -183,7 +183,7 @@ export default async function DashboardPage() {
               ))}
 
               {!atLimit && (
-                <Link href="/widget/new">
+                <Link href="/dashboard/widget/new">
                   <Card className="bg-slate-900/50 border-slate-800 border-dashed hover:bg-slate-900 hover:border-slate-700 transition-all cursor-pointer">
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-center gap-3 text-slate-400">
