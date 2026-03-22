@@ -755,57 +755,63 @@ export default function NewWidgetPage() {
             {/* Step 3: Get Code */}
             {step === 3 && (
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-8 space-y-6">
-                <h2 className="text-xl font-semibold text-white">Your Embed Code</h2>
-
-                {/* Simple one-line install option */}
-                <div className="bg-violet-600/10 border border-violet-500/30 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-violet-400 uppercase tracking-wider mb-2">Simplest Option — 1 line</p>
-                  <div className="bg-slate-950 rounded-lg p-3 overflow-x-auto">
-                    <code className="text-sm text-green-400 font-mono whitespace-nowrap">
-                      {`<script src="https://vissar.vercel.app/widget/vissar-widget.min.js" data-vissar-widget="${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}" async></script>`}
-                    </code>
-                  </div>
-                  <p className="text-xs text-violet-300/70 mt-2">Paste anywhere in your HTML. Widget auto-detects your site styles.</p>
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Install Your Widget</h2>
+                  <p className="text-sm text-slate-400 mt-1">Copy your code, then follow the guide for your platform</p>
                 </div>
 
-                {/* Full config code */}
-                <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Full Config Code</p>
-                  <div className="relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+                {/* The code — 1 line, prominent */}
+                <div className="bg-slate-950 border border-slate-700 rounded-xl overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800">
+                    <span className="text-xs font-medium text-slate-400">Embed Code</span>
+                    <button
+                      onClick={copyToClipboard}
+                      className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
+                        isCopied ? 'bg-emerald-600/20 text-emerald-400' : 'bg-violet-600/20 text-violet-400 hover:bg-violet-600/30'
+                      }`}
+                    >
+                      {isCopied ? <><Check className="w-3.5 h-3.5" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
+                    </button>
+                  </div>
+                  <div className="p-4 overflow-x-auto">
+                    <code className="text-sm text-green-400 font-mono whitespace-nowrap">
+                      {`<div id="vissar-${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}"></div>`}<br/>
+                      {`<script src="https://cdn.vissar.com/widget.js" data-widget="${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}" async></script>`}
+                    </code>
+                  </div>
+                </div>
+
+                {/* Full config — collapsed by default */}
+                <details className="group">
+                  <summary className="flex items-center gap-2 cursor-pointer text-sm text-slate-500 hover:text-slate-300 transition-colors list-none">
+                    <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+                    Advanced: show full config code
+                  </summary>
+                  <div className="mt-3 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
                     <pre className="p-4 text-xs text-slate-400 font-mono overflow-x-auto leading-relaxed max-h-48 overflow-y-auto">
                       {embedCode}
                     </pre>
                   </div>
-                </div>
+                </details>
 
-                <button
-                  onClick={copyToClipboard}
-                  className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-base transition-all ${
-                    isCopied
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-violet-600 hover:bg-violet-700 text-white'
-                  }`}
-                >
-                  {isCopied ? (
-                    <><Check className="w-5 h-5" /> Copied!</>
-                  ) : (
-                    <><Copy className="w-5 h-5" /> Copy Embed Code</>
-                  )}
-                </button>
-
-                {/* Install instructions */}
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">How to Install</p>
-                  {[
-                    { num: "1", text: "Copy the code above" },
-                    { num: "2", text: "Paste it in your website's HTML, before the </body> tag" },
-                    { num: "3", text: "The widget automatically appears and matches your site's style" },
-                  ].map((step) => (
-                    <div key={step.num} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-violet-600/20 flex items-center justify-center text-xs font-bold text-violet-400 shrink-0 mt-0.5">{step.num}</div>
-                      <p className="text-sm text-slate-300">{step.text}</p>
-                    </div>
-                  ))}
+                {/* Platform guides */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Install on your platform</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { name: "WordPress", step: "Appearance → Theme Editor → paste before </body>" },
+                      { name: "Webflow", step: "Project Settings → Custom Code → paste in Footer" },
+                      { name: "Shopify", step: "Online Store → Themes → Edit code → theme.liquid" },
+                      { name: "Wix", step: "Settings → Custom Code → Add code to head/body" },
+                      { name: "Squarespace", step: "Settings → Advanced → Code Injection → Footer" },
+                      { name: "Any site", step: "Paste the code before </body> in your HTML" },
+                    ].map((platform) => (
+                      <div key={platform.name} className="bg-slate-800/50 border border-slate-700 rounded-xl p-3">
+                        <p className="text-xs font-semibold text-white mb-1">{platform.name}</p>
+                        <p className="text-[11px] text-slate-400 leading-snug">{platform.step}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex gap-3">
@@ -820,7 +826,7 @@ export default function NewWidgetPage() {
                     disabled={isSaving}
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors disabled:opacity-50"
                   >
-                    {isSaving ? 'Creating...' : 'Save Widget'}
+                    {isSaving ? 'Saving...' : 'Save Widget'}
                   </button>
                 </div>
               </div>
