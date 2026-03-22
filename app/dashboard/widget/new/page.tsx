@@ -135,6 +135,7 @@ export default function NewWidgetPage() {
     showSentimentBadges: true,
     showReplies: true,
     gdprMode: false,
+    customCss: '',
   });
 
   // Load existing widget if editing
@@ -866,6 +867,36 @@ export default function NewWidgetPage() {
                           )}
                         </div>
                       )}
+
+                      {/* Custom CSS — Business only */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-medium text-slate-300">Custom CSS</label>
+                          {userPlan !== 'business' && (
+                            <span className="flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                              <Lock className="w-3 h-3" /> Business
+                            </span>
+                          )}
+                        </div>
+                        {userPlan === 'business' ? (
+                          <>
+                            <textarea
+                              rows={5}
+                              placeholder=".vissar-card { border-radius: 0; }
+.vissar-review-text { font-size: 14px; }"
+                              value={config.customCss}
+                              onChange={(e) => setConfig({ ...config, customCss: e.target.value })}
+                              className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-mono placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                            />
+                            <p className="text-xs text-slate-500">Override widget styles with custom CSS. Target <code className="text-violet-400">.vissar-card</code>, <code className="text-violet-400">.vissar-widget</code>, etc.</p>
+                          </>
+                        ) : (
+                          <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 border-dashed text-center">
+                            <p className="text-xs text-slate-500">Custom CSS is available on the Business plan</p>
+                            <a href="/pricing" className="text-xs text-violet-400 hover:underline mt-1 inline-block">Upgrade →</a>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
