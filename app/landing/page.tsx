@@ -50,11 +50,14 @@ const logos = [
 
 const features = [
   { icon: Palette, title: "Auto-Styled", description: "Detects your site's colors, fonts & spacing. Renders reviews that look custom-built — zero configuration." },
-  { icon: Zap, title: "Lightning Fast", description: "Under 30KB, zero dependencies. Loads in milliseconds without adding bloat to your site." },
-  { icon: LayoutGrid, title: "Multiple Layouts", description: "Carousel, grid, list, floating badge. Pick what fits your design — or let Vissar decide." },
+  { icon: Zap, title: "14 Layouts", description: "Carousel, grid, marquee, wall of love, spotlight, popup, and more. One widget, infinite looks." },
+  { icon: LayoutGrid, title: "10 Templates", description: "Soft shadows, glassmorphism, dark elegant, gradient borders, neon glow — match any brand." },
   { icon: Shield, title: "Privacy First", description: "No cookies, no tracking pixels, no GDPR headaches. Clean, compliant by default." },
-  { icon: SlidersHorizontal, title: "Full Control", description: "Override any style with CSS custom properties when you need pixel-perfect precision." },
-  { icon: Globe, title: "Works Everywhere", description: "Any website, any framework. Paste one script tag and you're live." },
+  { icon: SlidersHorizontal, title: "Real Google Reviews", description: "Direct Google Places API integration. 730+ reviews? We fetch and display them all." },
+  { icon: Globe, title: "Works Everywhere", description: "WordPress, Webflow, Shopify, Squarespace — or any site. Paste one script tag and you're live." },
+  { icon: Timer, title: "2-Minute Setup", description: "Search your business, pick a style, copy one snippet. No developer needed." },
+  { icon: Sparkles, title: "Analytics Built-In", description: "See view counts, click-through rates, and engagement trends right in your dashboard." },
+  { icon: Globe, title: "Agency Ready", description: "Client management, bulk widget creation, white-label options. Built for teams." },
 ];
 
 const plans = [
