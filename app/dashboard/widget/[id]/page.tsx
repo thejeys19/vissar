@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,8 @@ const LAYOUTS = [
   { value: "badge", label: "Floating Badge", description: "Corner widget with popup" },
 ];
 
-export default function EditWidgetPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function EditWidgetPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -57,8 +57,7 @@ export default function EditWidgetPage({ params }: { params: Promise<{ id: strin
       });
     } catch (error) {
       console.error('Error fetching widget:', error);
-      alert('Widget not found');
-      router.push('/');
+      router.push('/dashboard');
     } finally {
       setIsLoading(false);
     }
@@ -310,7 +309,6 @@ export default function EditWidgetPage({ params }: { params: Promise<{ id: strin
         </div>
       </main>
 
-      <script src="/widget/vissar-widget.min.js" async />
     </div>
   );
 }

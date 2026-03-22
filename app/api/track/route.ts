@@ -1,65 +1,47 @@
 import { NextResponse } from 'next/server';
-import { getWidget } from '@/lib/db';
+import { Redis } from '@upstash/redis';
 
-// In-memory usage store (replace with Redis/DB in production)
-const usageStore = new Map();
+export const dynamic = "force-dynamic";
+
+function getRedis() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) throw new Error('Redis not configured');
+  return new Redis({ url, token });
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { widgetId, timestamp, url, referrer } = body;
+    const { widgetId, event } = body;
 
-    if (!widgetId) {
-      return NextResponse.json(
-        { error: 'Widget ID required' },
-        { status: 400 }
-      );
+    if (!widgetId || !event) {
+      return NextResponse.json({ error: 'widgetId and event required' }, { status: 400 });
     }
 
-    // Get widget to check tier
-    const widget = await getWidget(widgetId);
-    
-    if (!widget) {
-      return NextResponse.json(
-        { error: 'Widget not found' },
-        { status: 404 }
-      );
+    if (event !== 'view' && event !== 'click') {
+      return NextResponse.json({ error: 'event must be "view" or "click"' }, { status: 400 });
     }
 
-    const now = new Date();
-    const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
-    const usageKey = `${widgetId}:${monthKey}`;
+    const redis = getRedis();
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-    // Log tracking data (for analytics)
-    console.log('Track:', { widgetId, timestamp, url, referrer });
+    const pipeline = redis.pipeline();
 
-    // Get or create usage record
-    const usage = usageStore.get(usageKey) || {
-      count: 0,
-      tier: widget.tier || 'free',
-      limit: widget.tier === 'free' ? 200 : widget.tier === 'pro' ? 10000 : Infinity
-    };
+    // Per-widget totals
+    pipeline.incr(`analytics:${widgetId}:${event}s`);
 
-    // Increment count
-    usage.count++;
-    usageStore.set(usageKey, usage);
+    // Daily breakdown
+    pipeline.incr(`analytics:${widgetId}:${today}:${event}s`);
 
-    // Check if over limit
-    const allowed = usage.count <= usage.limit;
+    // Global daily (across all widgets)
+    pipeline.incr(`analytics:${today}:${event}s`);
 
-    return NextResponse.json({
-      widgetId,
-      count: usage.count,
-      tier: usage.tier,
-      limit: usage.limit,
-      allowed,
-      remaining: Math.max(0, usage.limit - usage.count)
-    });
+    await pipeline.exec();
+
+    return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error('Usage tracking error:', error);
-    return NextResponse.json(
-      { error: 'Tracking failed' },
-      { status: 500 }
-    );
+    console.error('Track error:', error);
+    return NextResponse.json({ error: 'Tracking failed' }, { status: 500 });
   }
 }

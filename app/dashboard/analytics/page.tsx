@@ -3,6 +3,14 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getWidgetsByUser } from "@/lib/db";
 import { getUserPlanAsync } from "@/lib/plans";
+import { Redis } from "@upstash/redis";
+
+function getRedis() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  return new Redis({ url, token });
+}
 
 export default async function AnalyticsPage() {
   const session = await getServerSession(authOptions);
@@ -12,33 +20,70 @@ export default async function AnalyticsPage() {
   const userPlan = await getUserPlanAsync(session.user.email);
   const widgets = await getWidgetsByUser(userId).catch(() => []);
 
-  const totalViews = userPlan.views || 0;
+  // Fetch real analytics from Redis
+  let totalViews = 0;
+  let totalClicks = 0;
+  const widgetStats: { id: string; name: string; views: number; clicks: number; ctr: number }[] = [];
+  const days: string[] = [];
+  const dayLabels: string[] = [];
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+    dayLabels.push(weekdays[d.getDay()]);
+  }
+
+  let daily = dayLabels.map(label => ({ date: label, views: 0, clicks: 0 }));
+
+  const redis = getRedis();
+  if (redis && widgets.length > 0) {
+    try {
+      const pipeline = redis.pipeline();
+      for (const w of widgets) {
+        pipeline.get(`analytics:${w.id}:views`);
+        pipeline.get(`analytics:${w.id}:clicks`);
+      }
+      for (const day of days) {
+        for (const w of widgets) {
+          pipeline.get(`analytics:${w.id}:${day}:views`);
+          pipeline.get(`analytics:${w.id}:${day}:clicks`);
+        }
+      }
+      const results = await pipeline.exec();
+      let idx = 0;
+
+      for (const w of widgets) {
+        const views = Number(results[idx++]) || 0;
+        const clicks = Number(results[idx++]) || 0;
+        totalViews += views;
+        totalClicks += clicks;
+        const ctr = views > 0 ? Math.round((clicks / views) * 1000) / 10 : 0;
+        widgetStats.push({ id: w.id, name: w.name, views, clicks, ctr });
+      }
+
+      daily = days.map((_, di) => {
+        let dayViews = 0;
+        let dayClicks = 0;
+        for (let wi = 0; wi < widgets.length; wi++) {
+          dayViews += Number(results[idx++]) || 0;
+          dayClicks += Number(results[idx++]) || 0;
+        }
+        return { date: dayLabels[di], views: dayViews, clicks: dayClicks };
+      });
+    } catch (e) {
+      console.error("Analytics fetch error:", e);
+    }
+  }
+
   const viewLimit = userPlan.limit || 200;
 
   const stats = [
     { label: "Total Views", value: totalViews.toLocaleString(), color: "text-violet-400" },
-    { label: "View Limit", value: viewLimit.toLocaleString(), color: "text-emerald-400" },
+    { label: "Total Clicks", value: totalClicks.toLocaleString(), color: "text-emerald-400" },
     { label: "Widgets Active", value: widgets.length.toString(), color: "text-amber-400" },
-    { label: "Plan", value: userPlan.plan.charAt(0).toUpperCase() + userPlan.plan.slice(1), color: "text-blue-400" },
-  ];
-
-  // Mock 7-day distribution of views
-  const daily = totalViews > 0 ? [
-    { date: "Mon", views: Math.floor(totalViews * 0.12) },
-    { date: "Tue", views: Math.floor(totalViews * 0.18) },
-    { date: "Wed", views: Math.floor(totalViews * 0.14) },
-    { date: "Thu", views: Math.floor(totalViews * 0.20) },
-    { date: "Fri", views: Math.floor(totalViews * 0.16) },
-    { date: "Sat", views: Math.floor(totalViews * 0.11) },
-    { date: "Sun", views: Math.floor(totalViews * 0.09) },
-  ] : [
-    { date: "Mon", views: 0 },
-    { date: "Tue", views: 0 },
-    { date: "Wed", views: 0 },
-    { date: "Thu", views: 0 },
-    { date: "Fri", views: 0 },
-    { date: "Sat", views: 0 },
-    { date: "Sun", views: 0 },
+    { label: "View Limit", value: viewLimit.toLocaleString(), color: "text-blue-400" },
   ];
 
   const maxViews = Math.max(...daily.map((d) => d.views), 1);
@@ -86,7 +131,7 @@ export default async function AnalyticsPage() {
       {/* Per-Widget Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
         <div className="p-4 sm:p-6 border-b border-slate-800">
-          <h2 className="text-base sm:text-lg font-semibold text-white">Your Widgets</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-white">Per-Widget Performance</h2>
         </div>
         {widgets.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-sm">
@@ -98,18 +143,18 @@ export default async function AnalyticsPage() {
               <thead>
                 <tr className="border-b border-slate-800 text-left">
                   <th className="px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium text-slate-400">Widget</th>
-                  <th className="px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium text-slate-400">Layout</th>
-                  <th className="px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium text-slate-400">Reviews</th>
-                  <th className="px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium text-slate-400">Template</th>
+                  <th className="px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium text-slate-400">Views</th>
+                  <th className="px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium text-slate-400">Clicks</th>
+                  <th className="px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium text-slate-400">CTR</th>
                 </tr>
               </thead>
               <tbody>
-                {widgets.map((w) => (
+                {widgetStats.map((w) => (
                   <tr key={w.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
                     <td className="px-4 sm:px-6 py-3 text-white font-medium text-sm">{w.name}</td>
-                    <td className="px-4 sm:px-6 py-3 text-slate-300 text-sm capitalize">{w.layout}</td>
-                    <td className="px-4 sm:px-6 py-3 text-slate-300 text-sm">{w.maxReviews}</td>
-                    <td className="px-4 sm:px-6 py-3 text-violet-400 text-sm capitalize">{w.template}</td>
+                    <td className="px-4 sm:px-6 py-3 text-slate-300 text-sm">{w.views.toLocaleString()}</td>
+                    <td className="px-4 sm:px-6 py-3 text-slate-300 text-sm">{w.clicks.toLocaleString()}</td>
+                    <td className="px-4 sm:px-6 py-3 text-violet-400 text-sm">{w.ctr}%</td>
                   </tr>
                 ))}
               </tbody>

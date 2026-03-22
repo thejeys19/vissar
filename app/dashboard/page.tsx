@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Eye, MousePointer, Sparkles, Code2 } from "lucide-react";
+import { Plus, Eye, MousePointer, Sparkles } from "lucide-react";
+import WidgetCard from "@/components/widget-card";
 import { getWidgetsByUser } from "@/lib/db";
 import { getUserPlanAsync } from "@/lib/plans";
 
@@ -155,31 +156,7 @@ export default async function DashboardPage() {
           ) : (
             <>
               {widgets.map((widget) => (
-                <Card key={widget.id} className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-600/20 flex items-center justify-center shrink-0">
-                          <span className="text-violet-400 font-bold text-sm sm:text-base">{widget.name[0].toUpperCase()}</span>
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-white truncate">{widget.name}</h3>
-                          <p className="text-xs sm:text-sm text-slate-400 capitalize">{widget.layout} · {widget.template} · {widget.maxReviews} reviews</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Button variant="outline" size="sm" asChild className="border-slate-700 text-slate-300 hover:bg-slate-800 hidden sm:flex">
-                          <Link href={`/widget/${widget.id}`} className="flex items-center gap-1.5">
-                            <Code2 className="w-3.5 h-3.5" /> Get Code
-                          </Link>
-                        </Button>
-                        <Button size="sm" asChild className="bg-violet-600 hover:bg-violet-700">
-                          <Link href={`/widget/${widget.id}`}>Edit</Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <WidgetCard key={widget.id} widget={widget} />
               ))}
 
               {!atLimit && (

@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Check, Copy, ChevronLeft, ChevronRight, ChevronDown, LayoutGrid, List, Columns, MessageCircle, Search, Lock, MoveRight, Grid3X3, Heart, CircleDot, Star } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Check, Copy, ChevronLeft, ChevronRight, ChevronDown, LayoutGrid, List, Columns, MessageCircle, Search, Lock, MoveRight, Grid3X3, Heart, CircleDot, Star, X } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import WidgetPreview from '@/components/widget-preview';
 
 const LAYOUTS = [
@@ -14,6 +15,9 @@ const LAYOUTS = [
   { value: 'marquee', label: 'Marquee', description: 'Auto-scrolling ticker', icon: MoveRight },
   { value: 'masonry', label: 'Masonry', description: 'Pinterest-style grid', icon: Grid3X3 },
   { value: 'wall', label: 'Wall of Love', description: 'Dense review mosaic', icon: Heart },
+  { value: 'wall-sm', label: 'Scrolling Wall S', description: '2 rows, compact cards', icon: Heart },
+  { value: 'wall-md', label: 'Scrolling Wall M', description: '2 rows, standard cards', icon: Heart },
+  { value: 'wall-lg', label: 'Scrolling Wall L', description: '3 rows, large cards', icon: Heart },
   { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: CircleDot },
   { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: Star },
 ];
@@ -37,6 +41,23 @@ const FONT_OPTIONS = [
 
 const SHADOW_OPTIONS = ['None', 'Soft', 'Medium', 'Strong'];
 
+const LANGUAGE_OPTIONS = [
+  { value: 'all', label: 'All Languages' },
+  { value: 'en', label: 'English only' },
+  { value: 'fr', label: 'French' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'de', label: 'German' },
+  { value: 'ja', label: 'Japanese' },
+];
+
+interface ReviewItem {
+  id?: string;
+  reviewId?: string;
+  author: string;
+  rating: number;
+  text: string;
+}
+
 interface PlaceResult {
   placeId: string;
   name: string;
@@ -45,7 +66,10 @@ interface PlaceResult {
 
 export default function NewWidgetPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('id');
+  const [step, setStep] = useState(editId ? 3 : 1);
+  const [widgetId, setWidgetId] = useState<string | null>(editId);
   const [isSaving, setIsSaving] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -58,6 +82,17 @@ export default function NewWidgetPage() {
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { data: session } = useSession();
+
+  // Review pinning state
+  const [placeReviews, setPlaceReviews] = useState<ReviewItem[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+
+  // User plan for branding toggle
+  const [userPlan, setUserPlan] = useState('free');
+
+  // Keyword tag input state
+  const [keywordInput, setKeywordInput] = useState('');
 
   const [config, setConfig] = useState({
     name: '',
@@ -78,6 +113,7 @@ export default function NewWidgetPage() {
     showWriteReview: false,
     showHighlights: false,
     showVerifiedBadge: true,
+    injectSchema: false,
     showAvatar: true,
     showDate: true,
     sortBy: 'newest',
@@ -87,7 +123,20 @@ export default function NewWidgetPage() {
     starColor: '#F59E0B',
     pinnedReviews: '',
     keywords: '',
+    language: 'all',
   });
+
+  // Load existing widget if editing
+  useEffect(() => {
+    if (!editId) return;
+    fetch(`/api/widget/${editId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(w => {
+        if (!w) return;
+        setConfig(prev => ({ ...prev, ...w }));
+      })
+      .catch(() => {});
+  }, [editId]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -99,6 +148,29 @@ export default function NewWidgetPage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Fetch user plan for branding toggle
+  useEffect(() => {
+    fetch('/api/user/plan').then(r => r.ok ? r.json() : null).then(data => {
+      if (data?.plan) setUserPlan(data.plan);
+    }).catch(() => {});
+  }, []);
+
+  // Fetch reviews when a place is selected (for pinning UI)
+  useEffect(() => {
+    if (!config.placeId || config.placeId === 'mock') {
+      setPlaceReviews([]);
+      return;
+    }
+    setLoadingReviews(true);
+    fetch(`/api/reviews?placeId=${config.placeId}&maxReviews=20&minRating=1`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.reviews) setPlaceReviews(data.reviews);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingReviews(false));
+  }, [config.placeId]);
 
   const searchPlaces = useCallback(async (query: string) => {
     if (query.trim().length < 2) {
@@ -141,12 +213,15 @@ export default function NewWidgetPage() {
     }
     setIsSaving(true);
     try {
+      const payload = widgetId ? { ...config, id: widgetId } : config;
       const response = await fetch('/api/widget', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error('Failed to save');
+      const saved = await response.json();
+      if (!widgetId) setWidgetId(saved.id);
       router.push('/dashboard');
     } catch (error) {
       console.error('Error saving widget:', error);
@@ -156,9 +231,13 @@ export default function NewWidgetPage() {
     }
   };
 
+  const widgetSlug = widgetId || config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget';
+
+  const shortCode = `<div data-vissar-widget="${widgetSlug}" data-vissar-layout="${config.layout}" data-vissar-max-reviews="${config.maxReviews}"${config.injectSchema ? ' data-vissar-schema="true"' : ''}></div>\n<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
+
   const embedCode = `<!-- Vissar Reviews Widget -->
 <div
-  data-vissar-widget="${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}"
+  data-vissar-widget="${widgetSlug}"
   data-vissar-layout="${config.layout}"
   data-vissar-template="${config.template}"
   data-vissar-max-reviews="${config.maxReviews}"
@@ -174,13 +253,13 @@ export default function NewWidgetPage() {
   data-vissar-show-avatar="${config.showAvatar}"
   data-vissar-show-date="${config.showDate}"
   data-vissar-star-color="${config.starColor}"
-  data-vissar-primary-color="${config.primaryColor}"${config.keywords ? `\n  data-vissar-keywords="${config.keywords}"` : ''}${config.pinnedReviews ? `\n  data-vissar-pinned-reviews="${config.pinnedReviews}"` : ''}
+  data-vissar-primary-color="${config.primaryColor}"${config.keywords ? `\n  data-vissar-keywords="${config.keywords}"` : ''}${config.pinnedReviews ? `\n  data-vissar-pinned-reviews="${config.pinnedReviews}"` : ''}${config.injectSchema ? '\n  data-vissar-schema="true"' : ''}${config.removeBranding ? '\n  data-vissar-remove-branding="true"' : ''}${config.language && config.language !== 'all' ? `\n  data-vissar-language="${config.language}"` : ''}
 ></div>
 
-<script src="https://vissar.vercel.app/widget/vissar-widget.min.js" async></script>`;
+<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(embedCode);
+    navigator.clipboard.writeText(shortCode);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -492,14 +571,29 @@ export default function NewWidgetPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/20 text-violet-400 border border-violet-500/30">PRO</span>
-                          <button
-                            disabled
-                            className="relative w-12 h-7 rounded-full bg-slate-600 cursor-not-allowed opacity-60"
-                          >
-                            <Lock className="absolute top-1.5 left-1.5 w-4 h-4 text-slate-400" />
-                            <div className="absolute top-0.5 translate-x-0.5 w-6 h-6 rounded-full bg-white shadow" />
-                          </button>
+                          {(userPlan !== 'pro' && userPlan !== 'business') && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/20 text-violet-400 border border-violet-500/30">PRO</span>
+                          )}
+                          {(userPlan === 'pro' || userPlan === 'business') ? (
+                            <button
+                              onClick={() => setConfig({ ...config, removeBranding: !config.removeBranding })}
+                              className={`relative w-12 h-7 rounded-full transition-colors ${
+                                config.removeBranding ? 'bg-violet-600' : 'bg-slate-600'
+                              }`}
+                            >
+                              <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                                config.removeBranding ? 'translate-x-5' : 'translate-x-0.5'
+                              }`} />
+                            </button>
+                          ) : (
+                            <button
+                              disabled
+                              className="relative w-12 h-7 rounded-full bg-slate-600 cursor-not-allowed opacity-60"
+                            >
+                              <Lock className="absolute top-1.5 left-1.5 w-4 h-4 text-slate-400" />
+                              <div className="absolute top-0.5 translate-x-0.5 w-6 h-6 rounded-full bg-white shadow" />
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -564,6 +658,7 @@ export default function NewWidgetPage() {
                           { key: 'showDate', label: 'Show Date' },
                           { key: 'showVerifiedBadge', label: 'Verified Badge' },
                           { key: 'showHighlights', label: 'AI Highlights' },
+                          { key: 'injectSchema', label: 'Google Rich Snippets (SERP stars)' },
                         ].map((toggle) => (
                           <div key={toggle.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700">
                             <span className="text-sm text-slate-300">{toggle.label}</span>
@@ -583,18 +678,109 @@ export default function NewWidgetPage() {
                         ))}
                       </div>
 
-                      {/* Keywords Filter */}
+                      {/* Keywords Filter — Tag Chips */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-300">Keyword Filter</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. fast, professional, friendly"
-                          value={config.keywords}
-                          onChange={(e) => setConfig({ ...config, keywords: e.target.value })}
-                          className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
-                        />
-                        <p className="text-xs text-slate-500">Comma-separated. Only show reviews containing these words.</p>
+                        <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-slate-800 border border-slate-700 min-h-[44px]">
+                          {config.keywords.split(',').filter(k => k.trim()).map((keyword, i) => (
+                            <span key={i} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-600/20 text-violet-300 text-xs font-medium border border-violet-500/30">
+                              {keyword.trim()}
+                              <button
+                                onClick={() => {
+                                  const tags = config.keywords.split(',').filter(k => k.trim());
+                                  tags.splice(i, 1);
+                                  setConfig({ ...config, keywords: tags.join(',') });
+                                }}
+                                className="hover:text-red-400 transition-colors"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                          <input
+                            type="text"
+                            placeholder={config.keywords ? 'Add more...' : 'Type keyword and press Enter'}
+                            value={keywordInput}
+                            onChange={(e) => setKeywordInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if ((e.key === 'Enter' || e.key === ',') && keywordInput.trim()) {
+                                e.preventDefault();
+                                const existing = config.keywords ? config.keywords + ',' : '';
+                                setConfig({ ...config, keywords: existing + keywordInput.trim() });
+                                setKeywordInput('');
+                              }
+                              if (e.key === 'Backspace' && !keywordInput && config.keywords) {
+                                const tags = config.keywords.split(',').filter(k => k.trim());
+                                tags.pop();
+                                setConfig({ ...config, keywords: tags.join(',') });
+                              }
+                            }}
+                            className="flex-1 min-w-[120px] bg-transparent text-white text-sm placeholder-slate-500 focus:outline-none"
+                          />
+                        </div>
+                        <p className="text-xs text-slate-500">Press Enter or comma to add. Only show reviews containing these words.</p>
                       </div>
+
+                      {/* Review Language */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Review Language</label>
+                        <select
+                          value={config.language}
+                          onChange={(e) => setConfig({ ...config, language: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        >
+                          {LANGUAGE_OPTIONS.map((l) => (
+                            <option key={l.value} value={l.value}>{l.label}</option>
+                          ))}
+                        </select>
+                        <p className="text-xs text-slate-500">Filter reviews by language</p>
+                      </div>
+
+                      {/* Review Pinning */}
+                      {config.placeId && config.placeId !== 'mock' && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-300">Pin Reviews</label>
+                          <p className="text-xs text-slate-500">Select reviews to always show first</p>
+                          {loadingReviews ? (
+                            <div className="p-4 text-center text-slate-500 text-sm">Loading reviews...</div>
+                          ) : placeReviews.length > 0 ? (
+                            <div className="max-h-60 overflow-y-auto space-y-1 rounded-lg border border-slate-700 bg-slate-800/50 p-2">
+                              {placeReviews.map((review, i) => {
+                                const reviewId = review.id || review.reviewId || String(i);
+                                const pinnedIds = config.pinnedReviews ? config.pinnedReviews.split(',').filter(s => s.trim()) : [];
+                                const isPinned = pinnedIds.includes(reviewId);
+                                return (
+                                  <label key={reviewId} className={`flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${isPinned ? 'bg-violet-600/10 border border-violet-500/30' : 'hover:bg-slate-700/50 border border-transparent'}`}>
+                                    <input
+                                      type="checkbox"
+                                      checked={isPinned}
+                                      onChange={() => {
+                                        let ids = pinnedIds.filter(id => id);
+                                        if (isPinned) {
+                                          ids = ids.filter(id => id !== reviewId);
+                                        } else {
+                                          ids.push(reviewId);
+                                        }
+                                        setConfig({ ...config, pinnedReviews: ids.join(',') });
+                                      }}
+                                      className="mt-1 accent-violet-600 shrink-0"
+                                    />
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-white truncate">{review.author}</span>
+                                        <span className="text-amber-400 text-xs">{'★'.repeat(review.rating)}</span>
+                                      </div>
+                                      <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{review.text}</p>
+                                    </div>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="p-3 text-center text-slate-500 text-xs border border-slate-700 rounded-lg">No reviews found for this business</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -827,8 +1013,8 @@ export default function NewWidgetPage() {
                   </div>
                   <div className="p-3 sm:p-4 overflow-x-auto">
                     <code className="text-xs sm:text-sm text-green-400 font-mono">
-                      <span className="block break-all">{`<div id="vissar-${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}"></div>`}</span>
-                      <span className="block break-all mt-1">{`<script src="https://cdn.vissar.com/widget.js" data-widget="${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}" async></script>`}</span>
+                      <span className="block break-all">{`<div data-vissar-widget="${widgetSlug}" data-vissar-layout="${config.layout}" data-vissar-max-reviews="${config.maxReviews}"${config.injectSchema ? ' data-vissar-schema="true"' : ''}></div>`}</span>
+                      <span className="block break-all mt-1">{`<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`}</span>
                     </code>
                   </div>
                 </div>

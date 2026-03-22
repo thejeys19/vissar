@@ -392,6 +392,53 @@ export default function WidgetPreview({
         </div>
       )}
 
+      {(layout === 'wall-sm' || layout === 'wall-md' || layout === 'wall-lg') && (() => {
+        const cfg = layout === 'wall-sm'
+          ? { rows: 2, cardW: 130, textLen: 55, fontSize: 'text-[10px]' }
+          : layout === 'wall-lg'
+          ? { rows: 3, cardW: 180, textLen: 90, fontSize: 'text-[11px]' }
+          : { rows: 2, cardW: 155, textLen: 70, fontSize: 'text-xs' };
+
+        const perRow = Math.ceil(reviews.length / cfg.rows);
+        const rowSets = Array.from({ length: cfg.rows }, (_, i) =>
+          reviews.slice(i * perRow, (i + 1) * perRow)
+        ).filter(r => r.length > 0);
+
+        return (
+          <div className="flex flex-col gap-2 overflow-hidden w-full">
+            {rowSets.map((rowReviews, rowIdx) => (
+              <div key={rowIdx} className="overflow-hidden w-full">
+                <div
+                  className="flex gap-2"
+                  style={{
+                    animation: `vissar-preview-scroll-${rowIdx % 2} 12s linear infinite`,
+                    width: 'max-content',
+                  }}
+                >
+                  {[...rowReviews, ...rowReviews].map((review, i) => (
+                    <div
+                      key={i}
+                      style={{ width: cfg.cardW, flex: `0 0 ${cfg.cardW}px` }}
+                      className={`rounded-lg p-2 hover:shadow-lg transition-shadow ${getCardClasses(template, shadowIntensity, borderRadius)}`}
+                    >
+                      <Stars rating={review.rating} starColor={starColor} />
+                      <p className={`mt-1 leading-snug ${cfg.fontSize} ${getTextClasses(template).body}`}>
+                        {review.text.slice(0, cfg.textLen)}…
+                      </p>
+                      <div className={`mt-1 font-semibold text-[10px] ${getTextClasses(template).name}`}>{review.name}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <style>{`
+              @keyframes vissar-preview-scroll-0 { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+              @keyframes vissar-preview-scroll-1 { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+            `}</style>
+          </div>
+        );
+      })()}
+
       {layout === 'spotlight' && reviews.length > 0 && (
         <div className="flex flex-col items-center text-center px-4">
           <span
