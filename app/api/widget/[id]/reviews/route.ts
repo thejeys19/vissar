@@ -1,16 +1,43 @@
 import { NextResponse } from 'next/server';
+import { Redis } from '@upstash/redis';
 import { getWidget } from '@/lib/db';
 import { MOCK_REVIEWS, MOCK_BUSINESS } from '@/lib/mock-data';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const GOOGLE_PLACES_API_URL = 'https://places.googleapis.com/v1/places';
+const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
+
+export const dynamic = "force-dynamic";
 
 // CORS headers for widget embeds
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+  'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
 };
+
+function getRedis() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  return new Redis({ url, token });
+}
+
+interface ReviewItem {
+  id: string;
+  author: string;
+  avatar: string;
+  rating: number;
+  text: string;
+  date: string;
+  relativeTime?: string;
+}
+
+interface ReviewData {
+  business: { name: string; rating: number; totalReviews: number; placeId: string };
+  reviews: ReviewItem[];
+}
 
 interface GoogleReview {
   name: string;
@@ -29,19 +56,38 @@ interface GooglePlace {
   id: string;
 }
 
-async function fetchGoogleReviews(placeId: string) {
+async function getCachedReviews(placeId: string): Promise<ReviewData | null> {
+  const redis = getRedis();
+  if (!redis) return null;
+  try {
+    return await redis.get<ReviewData>(`reviews:${placeId}`);
+  } catch {
+    return null;
+  }
+}
+
+async function setCachedReviews(placeId: string, data: ReviewData): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
+  try {
+    await redis.set(`reviews:${placeId}`, data, { ex: CACHE_TTL_SECONDS });
+  } catch (err) {
+    console.error('Redis cache write error:', err);
+  }
+}
+
+async function fetchGoogleReviews(placeId: string): Promise<ReviewData | null> {
   if (!GOOGLE_PLACES_API_KEY) return null;
 
   try {
     const response = await fetch(
-      `${GOOGLE_PLACES_API_URL}/${placeId}?fields=id,displayName,rating,userRatingCount,reviews`,
+      `${GOOGLE_PLACES_API_URL}/${placeId}`,
       {
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
           'X-Goog-FieldMask': 'id,displayName,rating,userRatingCount,reviews',
         },
-        next: { revalidate: 3600 },
       }
     );
 
@@ -98,18 +144,28 @@ export async function GET(
   }
 
   const { searchParams } = new URL(request.url);
-  const maxReviews = parseInt(searchParams.get('maxReviews') || String(widget.maxReviews), 10);
-  const minRating = parseInt(searchParams.get('minRating') || String(widget.minRating), 10);
+  const maxReviews = parseInt(searchParams.get('maxReviews') || String(widget.maxReviews || 5), 10);
+  const minRating = parseInt(searchParams.get('minRating') || String(widget.minRating || 1), 10);
 
-  let data;
+  let data: ReviewData;
+  let cacheHit = false;
 
   // Try to fetch real Google reviews
   if (widget.placeId && widget.placeId !== 'mock' && GOOGLE_PLACES_API_KEY) {
-    const googleData = await fetchGoogleReviews(widget.placeId);
-    if (googleData) {
-      data = googleData;
+    // Check Redis cache first
+    const cached = await getCachedReviews(widget.placeId);
+    if (cached) {
+      data = cached;
+      cacheHit = true;
     } else {
-      data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
+      const googleData = await fetchGoogleReviews(widget.placeId);
+      if (googleData) {
+        data = googleData;
+        // Cache in Redis (fire-and-forget)
+        setCachedReviews(widget.placeId, googleData);
+      } else {
+        data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
+      }
     }
   } else {
     data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
@@ -131,5 +187,6 @@ export async function GET(
     reviews: filteredReviews,
     lastUpdated: new Date().toISOString(),
     source: widget.placeId && widget.placeId !== 'mock' ? 'google' : 'mock',
+    cached: cacheHit,
   }, { headers: corsHeaders });
 }

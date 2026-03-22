@@ -1,46 +1,54 @@
 import { NextResponse } from 'next/server';
 import { MOCK_REVIEWS, MOCK_BUSINESS } from '@/lib/mock-data';
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const GOOGLE_PLACES_API_URL = 'https://places.googleapis.com/v1/places';
-const CACHE_DIR = '/tmp/vissar-cache';
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
+
+export const dynamic = "force-dynamic";
 
 interface ReviewData {
   business: { name: string; rating: number; totalReviews: number; placeId: string };
   reviews: { id: string; author: string; avatar: string; rating: number; text: string; date: string; relativeTime?: string }[];
 }
 
-interface CacheEntry {
-  data: ReviewData;
-  cachedAt: string;
+function getRedis() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  return { url, token };
 }
 
-async function readCache(placeId: string): Promise<CacheEntry | null> {
+async function readRedisCache(placeId: string): Promise<ReviewData | null> {
+  const redis = getRedis();
+  if (!redis) return null;
   try {
-    const filePath = path.join(CACHE_DIR, `${placeId}.json`);
-    const raw = await readFile(filePath, 'utf-8');
-    const entry: CacheEntry = JSON.parse(raw);
-    const age = Date.now() - new Date(entry.cachedAt).getTime();
-    if (age < CACHE_TTL_MS) {
-      return entry;
-    }
-    return null;
+    const res = await fetch(`${redis.url}/get/reviews:${encodeURIComponent(placeId)}`, {
+      headers: { Authorization: `Bearer ${redis.token}` },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!json.result) return null;
+    return JSON.parse(json.result) as ReviewData;
   } catch {
     return null;
   }
 }
 
-async function writeCache(placeId: string, data: ReviewData): Promise<void> {
+async function writeRedisCache(placeId: string, data: ReviewData): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
   try {
-    await mkdir(CACHE_DIR, { recursive: true });
-    const filePath = path.join(CACHE_DIR, `${placeId}.json`);
-    const entry: CacheEntry = { data, cachedAt: new Date().toISOString() };
-    await writeFile(filePath, JSON.stringify(entry), 'utf-8');
+    await fetch(`${redis.url}/set/reviews:${encodeURIComponent(placeId)}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${redis.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ value: JSON.stringify(data), ex: CACHE_TTL_SECONDS }),
+    });
   } catch (err) {
-    console.error('Cache write error:', err);
+    console.error('Redis cache write error:', err);
   }
 }
 
@@ -71,7 +79,7 @@ interface GooglePlaceDetails {
   reviews?: GoogleReview[];
 }
 
-async function fetchGoogleReviews(placeId: string): Promise<{ business: { name: string; rating: number; totalReviews: number; placeId: string }; reviews: { id: string; author: string; avatar: string; rating: number; text: string; date: string; relativeTime: string }[] } | null> {
+async function fetchGoogleReviews(placeId: string): Promise<ReviewData | null> {
   if (!GOOGLE_PLACES_API_KEY) {
     console.warn('GOOGLE_PLACES_API_KEY not set, using mock data');
     return null;
@@ -79,14 +87,13 @@ async function fetchGoogleReviews(placeId: string): Promise<{ business: { name: 
 
   try {
     const response = await fetch(
-      `${GOOGLE_PLACES_API_URL}/${placeId}?fields=id,displayName,rating,userRatingCount,reviews`,
+      `${GOOGLE_PLACES_API_URL}/${placeId}`,
       {
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
           'X-Goog-FieldMask': 'id,displayName,rating,userRatingCount,reviews',
         },
-        next: { revalidate: 86400 }, // Cache for 24 hours
       }
     );
 
@@ -144,18 +151,21 @@ export async function GET(request: Request) {
   const minRating = parseInt(searchParams.get('minRating') || '1', 10);
 
   let data: ReviewData;
+  let cacheHit = false;
 
   // Try to fetch real Google reviews if API key is set and not using mock
   if (placeId !== 'mock' && GOOGLE_PLACES_API_KEY) {
-    // Check server-side file cache first
-    const cached = await readCache(placeId);
+    // Check Redis cache first
+    const cached = await readRedisCache(placeId);
     if (cached) {
-      data = cached.data;
+      data = cached;
+      cacheHit = true;
     } else {
       const googleData = await fetchGoogleReviews(placeId);
       if (googleData) {
         data = googleData;
-        await writeCache(placeId, googleData);
+        // Cache in Redis (fire-and-forget)
+        writeRedisCache(placeId, googleData);
       } else {
         // Fallback to mock data
         data = {
@@ -183,11 +193,13 @@ export async function GET(request: Request) {
     reviews: filteredReviews,
     lastUpdated: new Date().toISOString(),
     source: placeId === 'mock' ? 'mock' : 'google',
+    cached: cacheHit,
   }, {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
     }
   });
 }
