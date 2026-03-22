@@ -15,8 +15,13 @@ const LAYOUTS = [
   { value: 'marquee', label: 'Marquee', description: 'Auto-scrolling ticker', icon: MoveRight },
   { value: 'masonry', label: 'Masonry', description: 'Pinterest-style grid', icon: Grid3X3 },
   { value: 'wall', label: 'Wall of Love', description: 'Dense review mosaic', icon: Heart },
+  { value: 'wall-sm', label: 'Scrolling Wall S', description: '2 rows, compact cards', icon: Heart },
+  { value: 'wall-md', label: 'Scrolling Wall M', description: '2 rows, standard cards', icon: Heart },
+  { value: 'wall-lg', label: 'Scrolling Wall L', description: '3 rows, large cards', icon: Heart },
   { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: CircleDot },
   { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: Star },
+  { value: 'popup', label: 'Popup Button', description: 'Floating button → modal', icon: MessageCircle },
+  { value: 'quote', label: 'Single Quote', description: 'Rotating hero quote', icon: MessageCircle },
 ];
 
 const TEMPLATES = [
