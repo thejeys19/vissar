@@ -331,8 +331,8 @@ export default function LandingPage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">New Layouts</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">5 powerful new ways to display reviews</h2>
+            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">14 Layouts</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">14 layouts. One widget. Infinite possibilities.</h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">From scrolling tickers to cinematic spotlights. Pick the layout that fits your vibe.</p>
           </div>
 
@@ -423,7 +423,7 @@ export default function LandingPage() {
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { Icon: Zap, text: "Under 30KB" },
-              { Icon: Palette, text: "10+ Templates" },
+              { Icon: Palette, text: "10 Templates + 14 Layouts" },
               { Icon: Sparkles, text: "Auto-matches your brand" },
               { Icon: Lock, text: "No cookies" },
             ].map((stat) => (
@@ -446,7 +446,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Templates</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Choose your style</h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">6 premium templates included. Each one adapts to your brand.</p>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">10 premium templates. 14 layouts. Each one adapts to your brand.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

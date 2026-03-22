@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /landing
+Allow: /pricing
+Allow: /widget/new
+Disallow: /dashboard
+Disallow: /api
+Disallow: /auth
+
+Sitemap: https://www.vissar.com/sitemap.xml
