@@ -138,21 +138,50 @@ export default async function DashboardPage() {
         
         <div className="grid gap-4">
           {widgets.length === 0 ? (
-            <Link href="/dashboard/widget/new">
-              <Card className="bg-slate-900/50 border-slate-800 border-dashed hover:bg-slate-900 hover:border-violet-500/50 transition-all cursor-pointer">
-                <CardContent className="p-8 sm:p-12">
-                  <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
-                    <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center">
-                      <Plus className="w-7 h-7 text-violet-400" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-medium text-white">Create your first widget</p>
-                      <p className="text-sm text-slate-500 mt-1">Set up in 2 minutes. No coding required.</p>
-                    </div>
+            <div className="space-y-4">
+              {/* Onboarding steps */}
+              <Card className="bg-slate-900 border-slate-800">
+                <CardContent className="p-6">
+                  <h2 className="text-lg font-semibold text-white mb-5">Get started in 3 steps</h2>
+                  <div className="space-y-4">
+                    {[
+                      { step: 1, title: "Create your widget", desc: "Pick a layout, choose a style, search for your business", href: "/dashboard/widget/new", cta: "Create Widget", done: false },
+                      { step: 2, title: "Copy the embed code", desc: "One snippet — paste it into your website", href: null, cta: null, done: false },
+                      { step: 3, title: "Watch reviews appear", desc: "Auto-styled to match your site, instantly live", href: null, cta: null, done: false },
+                    ].map(({ step, title, desc, href, cta }) => (
+                      <div key={step} className="flex items-start gap-4">
+                        <div className="w-8 h-8 rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center shrink-0 text-violet-400 font-bold text-sm">{step}</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-white text-sm">{title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                        </div>
+                        {href && cta && (
+                          <Link href={href} className="shrink-0 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                            {cta}
+                          </Link>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+
+              <Link href="/dashboard/widget/new">
+                <Card className="bg-slate-900/50 border-slate-800 border-dashed hover:bg-slate-900 hover:border-violet-500/50 transition-all cursor-pointer">
+                  <CardContent className="p-6 sm:p-8">
+                    <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
+                      <div className="w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center">
+                        <Plus className="w-6 h-6 text-violet-400" />
+                      </div>
+                      <div className="text-center">
+                        <p className="font-medium text-white">Create your first widget →</p>
+                        <p className="text-sm text-slate-500 mt-1">Free forever • No credit card required</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
           ) : (
             <>
               {widgets.map((widget) => (
