@@ -131,6 +131,7 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  try {
   const widgetId = params.id;
   
   // Get widget config from database
@@ -189,4 +190,11 @@ export async function GET(
     source: widget.placeId && widget.placeId !== 'mock' ? 'google' : 'mock',
     cached: cacheHit,
   }, { headers: corsHeaders });
+  } catch (error) {
+    console.error('[widget/reviews] Error:', error instanceof Error ? error.message : String(error));
+    return NextResponse.json(
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
+      { status: 500, headers: corsHeaders }
+    );
+  }
 }
