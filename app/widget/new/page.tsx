@@ -199,9 +199,9 @@ export default function NewWidgetPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-10">
+        <div className="flex items-center justify-center mb-8">
           {stepLabels.map((label, i) => {
             const stepNum = i + 1;
             const isActive = step === stepNum;
@@ -210,10 +210,10 @@ export default function NewWidgetPage() {
               <div key={label} className="flex items-center">
                 <button
                   onClick={() => setStep(stepNum)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1.5 sm:gap-2"
                 >
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all shrink-0 ${
                       isActive
                         ? 'bg-violet-600 text-white ring-4 ring-violet-600/30'
                         : isDone
@@ -224,7 +224,7 @@ export default function NewWidgetPage() {
                     {isDone ? <Check className="w-4 h-4" /> : stepNum}
                   </div>
                   <span
-                    className={`text-sm font-medium ${
+                    className={`text-xs sm:text-sm font-medium ${
                       isActive ? 'text-white' : isDone ? 'text-violet-400' : 'text-slate-500'
                     }`}
                   >
@@ -233,7 +233,7 @@ export default function NewWidgetPage() {
                 </button>
                 {i < stepLabels.length - 1 && (
                   <div
-                    className={`w-16 h-0.5 mx-3 ${
+                    className={`w-8 sm:w-16 h-0.5 mx-2 sm:mx-3 ${
                       step > stepNum ? 'bg-violet-600' : 'bg-slate-800'
                     }`}
                   />
@@ -243,7 +243,7 @@ export default function NewWidgetPage() {
           })}
         </div>
 
-        <div className="grid lg:grid-cols-[1fr,1fr] gap-8">
+        <div className="grid lg:grid-cols-[1fr,1fr] gap-6 sm:gap-8">
           {/* Left Panel - Config */}
           <div className="space-y-6">
             {/* Step 1: Configure */}
@@ -386,7 +386,7 @@ export default function NewWidgetPage() {
                 <div>
                   <button
                     onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-400 transition-colors"
+                    className="flex items-center gap-1 text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors"
                   >
                     Advanced Settings <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
                   </button>
@@ -802,7 +802,7 @@ export default function NewWidgetPage() {
           </div>
 
           {/* Right Panel - Live Preview */}
-          <div className="lg:sticky lg:top-8 lg:self-start">
+          <div className="lg:sticky lg:top-8 lg:self-start hidden lg:block">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-500/70" />

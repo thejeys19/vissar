@@ -7,10 +7,38 @@ import Image from "next/image";
 import { Star, Check, ArrowRight, Zap, Shield, LayoutGrid, Palette, SlidersHorizontal, Globe, Timer, Sparkles, Lock } from "lucide-react";
 
 const reviews = [
-  { name: "Emma Williams", role: "Marketing Director", company: "TechFlow", rating: 5, text: "Our conversion rate went up 23% after adding Vissar. The widget blends in so perfectly that customers think it's part of our site." },
-  { name: "James Clark", role: "Co-Founder", company: "Launchpad Co.", rating: 5, text: "Setup took 2 minutes. The auto-styling is scary good — matched our brand colors without any tweaking." },
-  { name: "Lena Rodriguez", role: "Head of E-Commerce", company: "Verdant Shop", rating: 5, text: "We tried 4 other review widgets. Vissar is the only one that actually looks native. The difference is night and day." },
-  { name: "David Lee", role: "Agency Owner", company: "Pixel & Co.", rating: 5, text: "I use Vissar across all 12 of my clients' sites. The Business plan pays for itself with the first client." },
+  { 
+    name: "Emma Williams", 
+    role: "Marketing Director", 
+    company: "TechFlow", 
+    rating: 5, 
+    text: "Our conversion rate went up 23% after adding Vissar. The widget blends in so perfectly that customers think it's part of our site.",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face"
+  },
+  { 
+    name: "James Clark", 
+    role: "Co-Founder", 
+    company: "Launchpad Co.", 
+    rating: 5, 
+    text: "Setup took 2 minutes. The auto-styling is scary good — matched our brand colors without any tweaking.",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"
+  },
+  { 
+    name: "Lena Rodriguez", 
+    role: "Head of E-Commerce", 
+    company: "Verdant Shop", 
+    rating: 5, 
+    text: "We tried 4 other review widgets. Vissar is the only one that actually looks native. The difference is night and day.",
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&crop=face"
+  },
+  { 
+    name: "David Lee", 
+    role: "Agency Owner", 
+    company: "Pixel & Co.", 
+    rating: 5, 
+    text: "I use Vissar across all 12 of my clients' sites. The Business plan pays for itself with the first client.",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face"
+  },
 ];
 
 const logos = [
@@ -524,9 +552,11 @@ export default function LandingPage() {
                 <StarRating count={review.rating} />
                 <p className="text-slate-700 mt-4 mb-6 leading-relaxed">&ldquo;{review.text}&rdquo;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                    {review.name[0]}
-                  </div>
+                  <img
+                    src={review.avatar}
+                    alt={review.name}
+                    className="w-11 h-11 rounded-full object-cover"
+                  />
                   <div>
                     <p className="font-semibold text-slate-900 text-sm">{review.name}</p>
                     <p className="text-xs text-slate-500">{review.role}, {review.company}</p>
