@@ -1,18 +1,19 @@
-export const dynamic = "force-dynamic";
-
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { getUserPlan } from "@/lib/plans";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { getUserPlan } from '@/lib/plans';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
-    return Response.json({ plan: "free", views: 0, limit: 200 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const data = getUserPlan(session.user.email);
-  return Response.json({
-    plan: data.plan,
-    views: data.views || 147,
-    limit: data.limit,
+  const plan = getUserPlan(session.user.email);
+  return NextResponse.json({
+    plan: plan.plan,
+    views: plan.views,
+    limit: plan.limit,
+    email: session.user.email,
+    name: session.user.name,
   });
 }
