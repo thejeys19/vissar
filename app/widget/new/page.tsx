@@ -145,6 +145,20 @@ export default function NewWidgetPage() {
       setStep(1);
       return;
     }
+
+    // Check if user is signed in; if not, redirect to sign-in with return URL
+    try {
+      const authCheck = await fetch('/api/user/plan');
+      if (!authCheck.ok) {
+        // Not authenticated — save config to sessionStorage and redirect to sign-in
+        sessionStorage.setItem('vissar_pending_widget', JSON.stringify(config));
+        router.push('/auth/signin?callbackUrl=/dashboard/widget/new');
+        return;
+      }
+    } catch {
+      // If check fails, try to proceed anyway
+    }
+
     setIsSaving(true);
     try {
       const response = await fetch('/api/widget', {
