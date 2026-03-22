@@ -23,8 +23,8 @@ export const PLANS = {
   pro: {
     id: 'pro',
     name: 'Pro',
-    priceId: process.env.STRIPE_PRO_PRICE_ID,
-    price: 800, // $8 in cents
+    priceId: process.env.STRIPE_PRO_PRICE_ID || 'price_1TDEEW6HOkqbO74LsFovM8yB',
+    price: 800,
     widgets: 3,
     views: 10000,
     features: ['3 widgets', '10,000 views/month', 'All templates', 'No branding', 'Priority support']
@@ -32,8 +32,8 @@ export const PLANS = {
   business: {
     id: 'business',
     name: 'Business',
-    priceId: process.env.STRIPE_BUSINESS_PRICE_ID,
-    price: 1500, // $15 in cents
+    priceId: process.env.STRIPE_BUSINESS_PRICE_ID || 'price_1TDEEu6HOkqbO74LfGPV9D0w',
+    price: 1500,
     widgets: 9,
     views: 50000,
     features: ['9 widgets', '50,000 views/month', 'All templates', 'Custom CSS', 'No branding', 'API access', 'Priority support']
