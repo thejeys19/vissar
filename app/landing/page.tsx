@@ -746,6 +746,8 @@ export default function LandingPage() {
             <nav className="flex items-center gap-6">
               <a href="#features" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Features</a>
               <a href="#pricing" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Pricing</a>
+              <Link href="/docs/api" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">API</Link>
+              <Link href="/terms" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Terms</Link>
               <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Sign In</Link>
             </nav>
             <p className="text-slate-600 text-sm">© 2026 Vissar. All rights reserved.</p>

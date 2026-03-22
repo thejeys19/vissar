@@ -151,6 +151,17 @@ export default function IntegrationsPage() {
         </div>
       )}
 
+      {/* API Docs link */}
+      <div className="bg-violet-600/10 border border-violet-500/20 rounded-xl p-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-white">Full API Reference</p>
+          <p className="text-xs text-slate-400 mt-0.5">Explore all endpoints, widget attributes, and SDK options</p>
+        </div>
+        <a href="/docs/api" className="shrink-0 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg transition-colors">
+          View Docs →
+        </a>
+      </div>
+
       {/* Any Site */}
       {activeTab === "any" && (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 sm:p-6 space-y-5">
