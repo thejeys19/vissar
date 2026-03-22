@@ -161,8 +161,9 @@ export async function GET(
   if (widget.placeId && widget.placeId !== 'mock' && GOOGLE_PLACES_API_KEY) {
     // Check Redis cache first
     const cached = await getCachedReviews(widget.placeId);
-    if (cached) {
-      data = cached;
+    const cachedValid = cached && Array.isArray((cached as {reviews?: unknown}).reviews) && (cached as {reviews: unknown[]}).reviews.length > 0;
+    if (cachedValid) {
+      data = cached!;
       cacheHit = true;
     } else {
       const googleData = await fetchGoogleReviews(widget.placeId);
