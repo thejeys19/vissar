@@ -20,6 +20,8 @@ const LAYOUTS = [
   { value: 'wall-lg', label: 'Scrolling Wall L', description: '3 rows, large cards', icon: Heart },
   { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: CircleDot },
   { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: Star },
+  { value: 'popup', label: 'Popup Button', description: 'Floating button → modal', icon: MessageCircle },
+  { value: 'quote', label: 'Single Quote', description: 'Rotating hero quote', icon: MessageCircle },
 ];
 
 const TEMPLATES = [
@@ -82,7 +84,7 @@ export default function NewWidgetPage() {
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { data: session } = useSession();
+  useSession();
 
   // Review pinning state
   const [placeReviews, setPlaceReviews] = useState<ReviewItem[]>([]);
@@ -93,6 +95,8 @@ export default function NewWidgetPage() {
 
   // Keyword tag input state
   const [keywordInput, setKeywordInput] = useState('');
+
+  const [previewSize, setPreviewSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   const [config, setConfig] = useState({
     name: '',
@@ -124,6 +128,9 @@ export default function NewWidgetPage() {
     pinnedReviews: '',
     keywords: '',
     language: 'all',
+    dateRange: 'all',
+    blacklist: '',
+    showSentimentBadges: true,
   });
 
   // Load existing widget if editing
@@ -253,7 +260,7 @@ export default function NewWidgetPage() {
   data-vissar-show-avatar="${config.showAvatar}"
   data-vissar-show-date="${config.showDate}"
   data-vissar-star-color="${config.starColor}"
-  data-vissar-primary-color="${config.primaryColor}"${config.keywords ? `\n  data-vissar-keywords="${config.keywords}"` : ''}${config.pinnedReviews ? `\n  data-vissar-pinned-reviews="${config.pinnedReviews}"` : ''}${config.injectSchema ? '\n  data-vissar-schema="true"' : ''}${config.removeBranding ? '\n  data-vissar-remove-branding="true"' : ''}${config.language && config.language !== 'all' ? `\n  data-vissar-language="${config.language}"` : ''}
+  data-vissar-primary-color="${config.primaryColor}"${config.keywords ? `\n  data-vissar-keywords="${config.keywords}"` : ''}${config.pinnedReviews ? `\n  data-vissar-pinned-reviews="${config.pinnedReviews}"` : ''}${config.injectSchema ? '\n  data-vissar-schema="true"' : ''}${config.removeBranding ? '\n  data-vissar-remove-branding="true"' : ''}${config.language && config.language !== 'all' ? `\n  data-vissar-language="${config.language}"` : ''}${config.dateRange && config.dateRange !== 'all' ? `\n  data-vissar-date-range="${config.dateRange}"` : ''}${config.blacklist ? `\n  data-vissar-blacklist="${config.blacklist}"` : ''}${config.showSentimentBadges === false ? '\n  data-vissar-sentiment-badges="false"' : ''}
 ></div>
 
 <script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
@@ -659,6 +666,7 @@ export default function NewWidgetPage() {
                           { key: 'showVerifiedBadge', label: 'Verified Badge' },
                           { key: 'showHighlights', label: 'AI Highlights' },
                           { key: 'injectSchema', label: 'Google Rich Snippets (SERP stars)' },
+                          { key: 'showSentimentBadges', label: 'Sentiment Badges (Top/Detailed/Recent)' },
                         ].map((toggle) => (
                           <div key={toggle.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700">
                             <span className="text-sm text-slate-300">{toggle.label}</span>
@@ -734,6 +742,60 @@ export default function NewWidgetPage() {
                           ))}
                         </select>
                         <p className="text-xs text-slate-500">Filter reviews by language</p>
+                      </div>
+
+                      {/* Date Range Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Date Range</label>
+                        <select
+                          value={config.dateRange}
+                          onChange={(e) => setConfig({ ...config, dateRange: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        >
+                          <option value="all">All time</option>
+                          <option value="year">Last year</option>
+                          <option value="6months">Last 6 months</option>
+                          <option value="month">Last month</option>
+                          <option value="week">Last week</option>
+                        </select>
+                        <p className="text-xs text-slate-500">Only show reviews within this time range</p>
+                      </div>
+
+                      {/* Review Blacklist */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Hide Specific Reviews</label>
+                        <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-slate-800 border border-slate-700 min-h-[44px]">
+                          {config.blacklist.split(',').filter(k => k.trim()).map((id, i) => (
+                            <span key={i} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-600/20 text-red-300 text-xs font-medium border border-red-500/30">
+                              {id.trim()}
+                              <button
+                                onClick={() => {
+                                  const tags = config.blacklist.split(',').filter(k => k.trim());
+                                  tags.splice(i, 1);
+                                  setConfig({ ...config, blacklist: tags.join(',') });
+                                }}
+                                className="hover:text-red-400 transition-colors"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                          <input
+                            type="text"
+                            placeholder="Paste review ID and press Enter"
+                            onKeyDown={(e) => {
+                              const input = e.target as HTMLInputElement;
+                              if (e.key === 'Enter' && input.value.trim()) {
+                                e.preventDefault();
+                                const existing = config.blacklist ? config.blacklist + ',' : '';
+                                setConfig({ ...config, blacklist: existing + input.value.trim() });
+                                input.value = '';
+                              }
+                            }}
+                            className="flex-1 min-w-[120px] bg-transparent text-white text-sm placeholder-slate-500 focus:outline-none"
+                          />
+                        </div>
+                        <p className="text-xs text-slate-500">Blacklist Review IDs — these reviews will be hidden from the widget</p>
                       </div>
 
                       {/* Review Pinning */}
@@ -1073,6 +1135,26 @@ export default function NewWidgetPage() {
 
           {/* Right Panel - Live Preview (always visible, scrolls on mobile) */}
           <div className="lg:sticky lg:top-8 lg:self-start">
+            {/* Preview Size Toggle */}
+            <div className="flex justify-center gap-2 mb-3">
+              {[
+                { value: 'mobile' as const, label: 'Mobile', width: '375px' },
+                { value: 'tablet' as const, label: 'Tablet', width: '768px' },
+                { value: 'desktop' as const, label: 'Desktop', width: '100%' },
+              ].map((size) => (
+                <button
+                  key={size.value}
+                  onClick={() => setPreviewSize(size.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    previewSize === size.value
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
+                >
+                  {size.label}
+                </button>
+              ))}
+            </div>
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -1083,7 +1165,7 @@ export default function NewWidgetPage() {
                 </div>
                 <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded-full">{config.template} · {config.layout}</span>
               </div>
-              <div className="h-[300px] sm:h-[400px] lg:h-[500px] overflow-y-auto">
+              <div className="h-[300px] sm:h-[400px] lg:h-[500px] overflow-y-auto mx-auto transition-all" style={{ maxWidth: previewSize === 'mobile' ? '375px' : previewSize === 'tablet' ? '768px' : '100%' }}>
                 <WidgetPreview
                   layout={config.layout}
                   template={config.template}

@@ -499,6 +499,50 @@ export default function WidgetPreview({
         </div>
       )}
 
+      {layout === 'popup' && (
+        <div className="flex flex-col items-center justify-center min-h-[200px] relative">
+          <p className={`text-sm mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+            Widget renders as a floating button on your site
+          </p>
+          <div
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-white font-semibold shadow-lg cursor-default"
+            style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', boxShadow: '0 8px 30px rgba(124, 58, 237, 0.4)' }}
+          >
+            <span style={{ fontSize: '18px' }}>⭐</span>
+            See our reviews
+          </div>
+        </div>
+      )}
+
+      {layout === 'quote' && reviews.length > 0 && (
+        <div className="flex flex-col items-center text-center px-6 py-4">
+          <span
+            className="text-6xl font-serif leading-none mb-2"
+            style={{ color: primaryColor, opacity: 0.6 }}
+          >
+            &ldquo;
+          </span>
+          <Stars rating={reviews[0].rating} starColor={starColor} />
+          <p className={`text-base mt-4 leading-relaxed max-w-sm italic ${getTextClasses(template).body}`}>
+            {reviews[0].text}
+          </p>
+          <div className="mt-4">
+            <div className={`font-semibold text-sm ${getTextClasses(template).name}`}>
+              — {reviews[0].name}
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            {reviews.slice(0, Math.min(reviews.length, 5)).map((_, i) => (
+              <div
+                key={i}
+                className="w-2 h-2 rounded-full"
+                style={{ background: i === 0 ? (primaryColor || '#7c3aed') : (isDark ? '#4b5563' : '#d1d5db') }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Write a Review CTA */}
       {showWriteReview && (
         <div className="mt-5 flex justify-center">
