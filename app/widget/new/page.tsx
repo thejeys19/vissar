@@ -754,13 +754,28 @@ export default function NewWidgetPage() {
 
             {/* Step 3: Get Code */}
             {step === 3 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 space-y-8">
-                <h2 className="text-xl font-semibold text-white">Embed Code</h2>
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-8 space-y-6">
+                <h2 className="text-xl font-semibold text-white">Your Embed Code</h2>
 
-                <div className="relative">
-                  <pre className="bg-slate-950 border border-slate-800 rounded-xl p-5 text-sm text-slate-400 font-mono overflow-x-auto leading-relaxed">
-                    {embedCode}
-                  </pre>
+                {/* Simple one-line install option */}
+                <div className="bg-violet-600/10 border border-violet-500/30 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-violet-400 uppercase tracking-wider mb-2">Simplest Option — 1 line</p>
+                  <div className="bg-slate-950 rounded-lg p-3 overflow-x-auto">
+                    <code className="text-sm text-green-400 font-mono whitespace-nowrap">
+                      {`<script src="https://vissar.vercel.app/widget/vissar-widget.min.js" data-vissar-widget="${config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget'}" async></script>`}
+                    </code>
+                  </div>
+                  <p className="text-xs text-violet-300/70 mt-2">Paste anywhere in your HTML. Widget auto-detects your site styles.</p>
+                </div>
+
+                {/* Full config code */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Full Config Code</p>
+                  <div className="relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+                    <pre className="p-4 text-xs text-slate-400 font-mono overflow-x-auto leading-relaxed max-h-48 overflow-y-auto">
+                      {embedCode}
+                    </pre>
+                  </div>
                 </div>
 
                 <button
@@ -772,15 +787,26 @@ export default function NewWidgetPage() {
                   }`}
                 >
                   {isCopied ? (
-                    <>
-                      <Check className="w-5 h-5" /> Copied!
-                    </>
+                    <><Check className="w-5 h-5" /> Copied!</>
                   ) : (
-                    <>
-                      <Copy className="w-5 h-5" /> Copy Embed Code
-                    </>
+                    <><Copy className="w-5 h-5" /> Copy Embed Code</>
                   )}
                 </button>
+
+                {/* Install instructions */}
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">How to Install</p>
+                  {[
+                    { num: "1", text: "Copy the code above" },
+                    { num: "2", text: "Paste it in your website's HTML, before the </body> tag" },
+                    { num: "3", text: "The widget automatically appears and matches your site's style" },
+                  ].map((step) => (
+                    <div key={step.num} className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-violet-600/20 flex items-center justify-center text-xs font-bold text-violet-400 shrink-0 mt-0.5">{step.num}</div>
+                      <p className="text-sm text-slate-300">{step.text}</p>
+                    </div>
+                  ))}
+                </div>
 
                 <div className="flex gap-3">
                   <button
@@ -794,23 +820,26 @@ export default function NewWidgetPage() {
                     disabled={isSaving}
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors disabled:opacity-50"
                   >
-                    {isSaving ? 'Creating...' : 'Create Widget'}
+                    {isSaving ? 'Creating...' : 'Save Widget'}
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Right Panel - Live Preview */}
-          <div className="lg:sticky lg:top-8 lg:self-start hidden lg:block">
+          {/* Right Panel - Live Preview (always visible, scrolls on mobile) */}
+          <div className="lg:sticky lg:top-8 lg:self-start">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/70" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-                <div className="w-3 h-3 rounded-full bg-green-500/70" />
-                <span className="ml-3 text-sm text-slate-400 font-medium">Live Preview</span>
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                  <span className="ml-2 text-sm text-slate-400 font-medium">Live Preview</span>
+                </div>
+                <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded-full">{config.template} · {config.layout}</span>
               </div>
-              <div className="h-[500px] overflow-y-auto">
+              <div className="h-[300px] sm:h-[400px] lg:h-[500px] overflow-y-auto">
                 <WidgetPreview
                   layout={config.layout}
                   template={config.template}
