@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/components/checkout-button";
 import Image from "next/image";
-import { Star, Check, ArrowRight, Zap, Shield, LayoutGrid, Palette, SlidersHorizontal, Globe } from "lucide-react";
+import { Star, Check, ArrowRight, Zap, Shield, LayoutGrid, Palette, SlidersHorizontal, Globe, Timer, Sparkles, Lock } from "lucide-react";
 
 const reviews = [
   { name: "Emma Williams", role: "Marketing Director", company: "TechFlow", rating: 5, text: "Our conversion rate went up 23% after adding Vissar. The widget blends in so perfectly that customers think it's part of our site." },
@@ -78,9 +78,9 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200/60 bg-white/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center gap-2.5">
-              <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-10 h-10 rounded-lg" />
-              <span className="font-bold text-xl tracking-tight text-slate-900">vissar</span>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <Image src="/logo-icon.png" alt="Vissar" width={48} height={48} className="w-12 h-12 rounded-2xl" />
+              <span className="font-bold text-2xl tracking-tight bg-gradient-to-r from-violet-600 to-blue-500 bg-clip-text text-transparent">vissar</span>
             </Link>
             <nav className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Features</a>
@@ -198,7 +198,9 @@ export default function LandingPage() {
               {/* Floating badge 2 */}
               <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg shadow-slate-200 border border-slate-100 px-4 py-2">
                 <p className="text-xs text-slate-500">Setup time</p>
-                <p className="text-sm font-bold text-violet-700">Under 2 mins ⚡</p>
+                <p className="text-sm font-bold text-violet-700 flex items-center gap-1">
+                  <Timer className="w-4 h-4" /> Under 2 mins
+                </p>
               </div>
             </div>
           </div>
@@ -392,13 +394,13 @@ export default function LandingPage() {
           {/* Why teams choose Vissar stats */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: "⚡", text: "Under 30KB" },
-              { icon: "🎨", text: "10+ Templates" },
-              { icon: "⭐", text: "Auto-matches your brand" },
-              { icon: "🔒", text: "No cookies" },
+              { Icon: Zap, text: "Under 30KB" },
+              { Icon: Palette, text: "10+ Templates" },
+              { Icon: Sparkles, text: "Auto-matches your brand" },
+              { Icon: Lock, text: "No cookies" },
             ].map((stat) => (
               <div key={stat.text} className="text-center p-4 rounded-xl bg-slate-800/50 border border-slate-800">
-                <span className="text-2xl mb-1 block">{stat.icon}</span>
+                <stat.Icon className="w-6 h-6 mx-auto mb-2 text-violet-400" />
                 <p className="text-sm font-medium text-slate-300">{stat.text}</p>
               </div>
             ))}
@@ -610,35 +612,80 @@ export default function LandingPage() {
       </section>
 
       {/* Integrations */}
-      <section className="py-24 bg-slate-950 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-3xl" />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Integrations</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Works on any platform</h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">Paste one script tag and you&apos;re live. No plugins, no build steps, no dependencies.</p>
-          </div>
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-10 md:p-14">
+            <div className="text-center mb-12">
+              <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Integrations</span>
+              <h2 className="text-3xl font-bold text-slate-900 mt-2">Works on any platform</h2>
+              <p className="text-slate-500 mt-3 max-w-xl mx-auto">Paste one script tag and you&apos;re live. No plugins, no build steps, no dependencies.</p>
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6">
-            {[
-              { name: "Shopify", icon: "S" },
-              { name: "Webflow", icon: "W" },
-              { name: "WordPress", icon: "WP" },
-              { name: "Wix", icon: "Wx" },
-              { name: "Squarespace", icon: "Sq" },
-              { name: "Framer", icon: "Fr" },
-              { name: "Notion", icon: "N" },
-              { name: "Any Website", icon: "</>" },
-            ].map((platform) => (
-              <div key={platform.name} className="flex flex-col items-center gap-3 group">
-                <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:border-violet-500/50 group-hover:bg-slate-800/80 transition-all duration-300">
-                  <span className="text-slate-300 font-bold text-lg group-hover:text-violet-400 transition-colors">{platform.icon}</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-8 items-center justify-items-center">
+              {/* Shopify */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <img src="/logos/shopify.jpg" alt="Shopify" className="w-10 h-10 object-contain rounded" />
                 </div>
-                <span className="text-sm text-slate-400 font-medium">{platform.name}</span>
+                <span className="text-sm font-medium text-slate-600">Shopify</span>
               </div>
-            ))}
+
+              {/* Webflow */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <img src="/logos/webflow.jpg" alt="Webflow" className="w-9 h-9 object-contain rounded" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Webflow</span>
+              </div>
+
+              {/* WordPress */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <img src="/logos/wordpress.jpg" alt="WordPress" className="w-10 h-10 object-contain rounded" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">WordPress</span>
+              </div>
+
+              {/* Wix */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <img src="/logos/wix.jpg" alt="Wix" className="w-12 h-6 object-contain" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Wix</span>
+              </div>
+
+              {/* Squarespace */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <img src="/logos/squarespace.jpg" alt="Squarespace" className="w-9 h-9 object-contain rounded" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Squarespace</span>
+              </div>
+
+              {/* Framer */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <img src="/logos/framer.jpg" alt="Framer" className="w-8 h-8 object-contain rounded" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Framer</span>
+              </div>
+
+              {/* Notion */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <img src="/logos/notion.jpg" alt="Notion" className="w-9 h-9 object-contain rounded" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Notion</span>
+              </div>
+
+              {/* Any site */}
+              <div className="flex flex-col items-center gap-3 group">
+                <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Globe className="w-8 h-8 text-slate-700" strokeWidth={1.5} />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Any site</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -671,8 +718,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="w-8 h-8 rounded-lg" />
-              <span className="font-bold text-white text-lg">vissar</span>
+              <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-10 h-10 rounded-xl" />
+              <span className="font-bold text-xl bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">vissar</span>
               <span className="text-slate-600 hidden sm:inline">— Reviews that belong.</span>
             </div>
             <nav className="flex items-center gap-6">

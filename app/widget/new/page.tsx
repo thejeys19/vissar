@@ -2,20 +2,21 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, ChevronLeft, ChevronRight, ChevronDown, LayoutGrid, List, Columns, MessageCircle, Search, Lock } from 'lucide-react';
+import { Check, Copy, ChevronLeft, ChevronRight, ChevronDown, LayoutGrid, List, Columns, MessageCircle, Search, Lock, MoveRight, Grid3X3, Heart, CircleDot, Star } from 'lucide-react';
 import WidgetPreview from '@/components/widget-preview';
 
 const LAYOUTS = [
-  { value: 'carousel', label: 'Carousel', description: 'Sliding cards', icon: Columns, emoji: null },
-  { value: 'grid', label: 'Grid', description: '2-column grid', icon: LayoutGrid, emoji: null },
-  { value: 'list', label: 'List', description: 'Vertical stack', icon: List, emoji: null },
-  { value: 'badge', label: 'Badge', description: 'Floating widget', icon: MessageCircle, emoji: null },
-  { value: 'marquee', label: 'Marquee', description: 'Auto-scrolling ticker', icon: null, emoji: '⟶' },
-  { value: 'masonry', label: 'Masonry', description: 'Pinterest-style grid', icon: null, emoji: '⊟' },
-  { value: 'wall', label: 'Wall of Love', description: 'Dense review mosaic', icon: null, emoji: '❤' },
-  { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: null, emoji: '◎' },
-  { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: null, emoji: '★' },
+  { value: 'carousel', label: 'Carousel', description: 'Sliding cards', icon: Columns },
+  { value: 'grid', label: 'Grid', description: '2-column grid', icon: LayoutGrid },
+  { value: 'list', label: 'List', description: 'Vertical stack', icon: List },
+  { value: 'badge', label: 'Badge', description: 'Floating widget', icon: MessageCircle },
+  { value: 'marquee', label: 'Marquee', description: 'Auto-scrolling ticker', icon: MoveRight },
+  { value: 'masonry', label: 'Masonry', description: 'Pinterest-style grid', icon: Grid3X3 },
+  { value: 'wall', label: 'Wall of Love', description: 'Dense review mosaic', icon: Heart },
+  { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: CircleDot },
+  { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: Star },
 ];
 
 const TEMPLATES = [
@@ -191,11 +192,9 @@ export default function NewWidgetPage() {
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">V</span>
-            </div>
-            <span className="font-bold text-xl">Create Widget</span>
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-10 h-10 rounded-xl" />
+            <span className="font-bold text-xl text-white">Create Widget</span>
           </Link>
         </div>
       </header>
@@ -267,7 +266,7 @@ export default function NewWidgetPage() {
                 {/* Layout Selector - Visual Cards */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-slate-300">Layout</label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {LAYOUTS.map((l) => {
                       const Icon = l.icon;
                       const isSelected = config.layout === l.value;
@@ -286,7 +285,7 @@ export default function NewWidgetPage() {
                               isSelected ? 'bg-violet-600 text-white' : 'bg-slate-700 text-slate-400'
                             }`}
                           >
-                            {Icon ? <Icon className="w-5 h-5" /> : <span className="text-lg">{l.emoji}</span>}
+                            {Icon ? <Icon className="w-5 h-5" /> : null}
                           </div>
                           <div>
                             <div className={`font-medium text-sm ${isSelected ? 'text-white' : 'text-slate-300'}`}>
@@ -358,15 +357,15 @@ export default function NewWidgetPage() {
                       </div>
                     )}
                     {showPlaceDropdown && placeResults.length > 0 && (
-                      <div className="absolute z-10 top-full mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden">
+                      <div className="absolute z-50 top-full mt-1 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
                         {placeResults.map((place) => (
                           <button
                             key={place.placeId}
                             onClick={() => handleSelectPlace(place)}
                             className="w-full text-left px-4 py-3 hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0"
                           >
-                            <div className="text-sm font-medium text-white">{place.name}</div>
-                            <div className="text-xs text-slate-400 mt-0.5">{place.address}</div>
+                            <div className="text-sm font-medium text-white truncate">{place.name}</div>
+                            <div className="text-xs text-slate-400 mt-0.5 truncate">{place.address}</div>
                           </button>
                         ))}
                       </div>
@@ -811,11 +810,21 @@ export default function NewWidgetPage() {
                 <div className="w-3 h-3 rounded-full bg-green-500/70" />
                 <span className="ml-3 text-sm text-slate-400 font-medium">Live Preview</span>
               </div>
-              <div className="p-4">
+              <div className="h-[500px] overflow-y-auto">
                 <WidgetPreview
                   layout={config.layout}
                   template={config.template}
                   maxReviews={config.maxReviews}
+                  animations={config.animations}
+                  animationStyle={config.animationStyle}
+                  primaryColor={config.primaryColor}
+                  borderRadius={config.borderRadius}
+                  shadowIntensity={config.shadowIntensity}
+                  cardSpacing={config.cardSpacing}
+                  showAvatar={config.showAvatar}
+                  showDate={config.showDate}
+                  starColor={config.starColor}
+                  colorScheme={config.colorScheme}
                 />
               </div>
             </div>
@@ -836,22 +845,23 @@ function TemplateSwatch({ templateId }: { templateId: string }) {
     neon: 'bg-slate-900 border border-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.4)]',
     aurora: 'bg-gradient-to-br from-violet-200/60 to-indigo-200/60 border border-violet-300/50',
     spotlight: 'bg-white shadow-[4px_4px_12px_rgba(0,0,0,0.15)] border border-slate-100',
-    classic: 'bg-white border-2 border-slate-400',
+    classic: 'bg-white border-2 border-slate-400 rounded-none',
     warm: 'bg-amber-50 border border-amber-200/60 shadow-sm',
   };
 
   const isDark = templateId === 'darkElegant' || templateId === 'neon';
+  const isWarm = templateId === 'warm';
 
   return (
     <div className={`w-14 h-10 rounded-lg ${swatchStyles[templateId] || swatchStyles.soft}`}>
       <div className="p-1.5 space-y-1">
         <div className="flex gap-0.5">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="w-1 h-1 rounded-full bg-amber-400" />
+            <div key={i} className={`w-1 h-1 rounded-full ${isWarm ? 'bg-amber-500' : 'bg-amber-400'}`} />
           ))}
         </div>
-        <div className={`h-0.5 w-8 rounded ${isDark ? 'bg-slate-600' : 'bg-slate-200'}`} />
-        <div className={`h-0.5 w-6 rounded ${isDark ? 'bg-slate-600' : 'bg-slate-200'}`} />
+        <div className={`h-0.5 w-8 rounded ${isDark ? 'bg-slate-600' : isWarm ? 'bg-amber-300' : 'bg-slate-200'}`} />
+        <div className={`h-0.5 w-6 rounded ${isDark ? 'bg-slate-600' : isWarm ? 'bg-amber-300' : 'bg-slate-200'}`} />
       </div>
     </div>
   );

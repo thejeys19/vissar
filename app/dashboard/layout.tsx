@@ -20,6 +20,15 @@ const navLinks = [
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
+// Logo text component that adapts to background
+function LogoText({ darkMode = false, className = "" }: { darkMode?: boolean; className?: string }) {
+  return (
+    <span className={`font-bold ${className} ${darkMode ? 'text-white' : 'bg-gradient-to-r from-violet-600 to-blue-500 bg-clip-text text-transparent'}`}>
+      vissar
+    </span>
+  );
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -45,9 +54,9 @@ export default function DashboardLayout({
           hidden md:flex md:flex-col md:w-16 lg:w-64 transition-all duration-200`}
       >
         <div className="p-4 lg:p-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg" />
-            <span className="font-bold text-xl hidden lg:inline">vissar</span>
+          <Link href="/" className="flex items-center gap-3">
+            <Image src="/logo-icon.png" alt="Vissar" width={44} height={44} className="w-11 h-11 rounded-2xl" />
+            <LogoText darkMode className="text-2xl hidden lg:inline" />
           </Link>
         </div>
 
@@ -88,9 +97,9 @@ export default function DashboardLayout({
         }`}
       >
         <div className="p-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-            <Image src="/logo-icon.png" alt="Vissar" width={40} height={40} className="w-10 h-10 rounded-lg" />
-            <span className="font-bold text-xl">vissar</span>
+          <Link href="/" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
+            <Image src="/logo-icon.png" alt="Vissar" width={44} height={44} className="w-11 h-11 rounded-2xl" />
+            <LogoText darkMode className="text-2xl" />
           </Link>
           <button onClick={() => setMobileOpen(false)} className="text-slate-400 hover:text-white">
             <X className="w-5 h-5" />
@@ -125,13 +134,13 @@ export default function DashboardLayout({
       </aside>
 
       {/* Mobile top bar with hamburger */}
-      <div className="fixed top-0 left-0 right-0 h-14 bg-slate-900 border-b border-slate-800 flex items-center px-4 z-30 md:hidden">
+      <div className="fixed top-0 left-0 right-0 h-16 bg-slate-900 border-b border-slate-800 flex items-center px-4 z-30 md:hidden">
         <button onClick={() => setMobileOpen(true)} className="text-slate-400 hover:text-white">
           <Menu className="w-6 h-6" />
         </button>
-        <Link href="/" className="flex items-center gap-2 ml-3">
-          <Image src="/logo-icon.png" alt="Vissar" width={32} height={32} className="w-8 h-8 rounded-lg" />
-          <span className="font-bold text-lg">vissar</span>
+        <Link href="/" className="flex items-center gap-2.5 ml-3">
+          <Image src="/logo-icon.png" alt="Vissar" width={36} height={36} className="w-9 h-9 rounded-xl" />
+          <LogoText darkMode className="text-xl" />
         </Link>
       </div>
 
@@ -150,8 +159,8 @@ export default function DashboardLayout({
       </div>
 
       {/* Main content */}
-      <main className="ml-0 md:ml-16 lg:ml-64 transition-all duration-200 pt-14 md:pt-0 pb-20 md:pb-0">
-        <div className="p-4 md:p-8">
+      <main className="ml-0 md:ml-16 lg:ml-64 transition-all duration-200 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
           {children}
         </div>
       </main>

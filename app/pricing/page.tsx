@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/components/checkout-button";
-import { Check, Zap, Crown, Sparkles } from "lucide-react";
+import { Check, Zap, Crown, Sparkles, PartyPopper } from "lucide-react";
 
 const plans = [
   {
@@ -89,8 +89,8 @@ function PricingContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Success/Canceled Banners */}
         {success && (
-          <div className="mb-8 rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-center text-emerald-800 font-medium">
-            🎉 You are now on the Pro plan!
+          <div className="mb-8 rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-center text-emerald-800 font-medium flex items-center justify-center gap-2">
+            <PartyPopper className="w-5 h-5" /> You are now on the Pro plan!
           </div>
         )}
         {canceled && (

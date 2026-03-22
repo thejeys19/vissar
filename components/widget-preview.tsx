@@ -1,11 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-
 interface WidgetPreviewProps {
   layout: string;
   template: string;
   maxReviews: number;
+  animations?: boolean;
+  primaryColor?: string;
+  borderRadius?: number;
+  shadowIntensity?: string;
+  cardSpacing?: number;
+  showAvatar?: boolean;
+  showDate?: boolean;
+  animationStyle?: string;
+  starColor?: string;
+  colorScheme?: string;
 }
 
 const MOCK_REVIEWS = [
@@ -51,11 +59,14 @@ const MOCK_REVIEWS = [
   },
 ];
 
-function Stars({ rating }: { rating: number }) {
+function Stars({ rating, starColor = '#F59E0B' }: { rating: number; starColor?: string }) {
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={i <= rating ? 'text-amber-400' : 'text-slate-600'}>
+        <span
+          key={i}
+          style={{ color: i <= rating ? starColor : '#475569' }}
+        >
           ★
         </span>
       ))}
@@ -63,130 +74,244 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-function getCardClasses(template: string): string {
+function getCardClasses(
+  template: string,
+  shadowIntensity: string = 'Soft',
+  borderRadius: number = 12
+): string {
+  const radiusClass = borderRadius === 0 ? 'rounded-none' : borderRadius <= 8 ? 'rounded-lg' : borderRadius <= 16 ? 'rounded-xl' : 'rounded-2xl';
+  
+  const shadowClass = {
+    'None': '',
+    'Soft': 'shadow-md',
+    'Medium': 'shadow-lg',
+    'Strong': 'shadow-xl',
+  }[shadowIntensity] || 'shadow-md';
+
   switch (template) {
     case 'glass':
-      return 'bg-white/10 backdrop-blur-xl border border-white/20 text-white';
+      return `bg-white/10 backdrop-blur-xl border border-white/20 text-white ${radiusClass}`;
     case 'minimal':
-      return 'bg-transparent border border-slate-300 text-slate-800';
+      return `bg-transparent border border-slate-300 text-slate-800 ${radiusClass}`;
     case 'darkElegant':
-      return 'bg-slate-800 border border-slate-700 text-slate-100';
+      return `bg-slate-800 border border-slate-700 text-slate-100 ${radiusClass} ${shadowClass}`;
     case 'gradientBorder':
-      return 'bg-white border-2 border-transparent text-slate-800 [background-clip:padding-box] ring-2 ring-violet-500/50';
+      return `bg-white border-2 border-transparent text-slate-800 [background-clip:padding-box] ring-2 ring-violet-500/50 ${radiusClass}`;
+    case 'neon':
+      return `bg-slate-950 border border-cyan-400 text-cyan-50 shadow-[0_0_20px_rgba(34,211,238,0.3)] ${radiusClass}`;
+    case 'aurora':
+      return `bg-gradient-to-br from-violet-100/80 to-indigo-100/80 border border-violet-200/50 text-slate-800 backdrop-blur-sm ${radiusClass}`;
+    case 'spotlight':
+      return `bg-white border border-slate-100 text-slate-800 shadow-[4px_4px_20px_rgba(0,0,0,0.12)] ${radiusClass}`;
+    case 'classic':
+      return `bg-white border-2 border-slate-400 text-slate-800 rounded-none`;
+    case 'warm':
+      return `bg-amber-50 border border-amber-200/60 text-amber-900 shadow-sm ${radiusClass}`;
     case 'soft':
     default:
-      return 'bg-white border border-slate-100 shadow-lg shadow-slate-200/50 text-slate-800';
+      return `bg-white border border-slate-100 ${shadowClass} text-slate-800 ${radiusClass}`;
   }
 }
 
-function getContainerBg(template: string): string {
+function getContainerBg(template: string, colorScheme: string = 'auto'): string {
+  if (colorScheme === 'dark') return 'bg-slate-900';
+  if (colorScheme === 'light') return 'bg-slate-50';
+  
   switch (template) {
     case 'glass':
       return 'bg-gradient-to-br from-violet-900/60 to-indigo-900/60';
     case 'darkElegant':
+    case 'neon':
       return 'bg-slate-900';
+    case 'classic':
     case 'minimal':
+      return 'bg-slate-100';
+    case 'warm':
+      return 'bg-amber-100/50';
     case 'soft':
     case 'gradientBorder':
+    case 'aurora':
+    case 'spotlight':
     default:
       return 'bg-slate-50';
   }
 }
 
 function getTextClasses(template: string): { name: string; role: string; body: string; date: string } {
-  const isDark = template === 'glass' || template === 'darkElegant';
+  const isDark = template === 'glass' || template === 'darkElegant' || template === 'neon';
+  const isWarm = template === 'warm';
   return {
-    name: isDark ? 'text-white' : 'text-slate-900',
-    role: isDark ? 'text-slate-400' : 'text-slate-500',
-    body: isDark ? 'text-slate-300' : 'text-slate-600',
-    date: isDark ? 'text-slate-500' : 'text-slate-400',
+    name: isDark ? 'text-white' : isWarm ? 'text-amber-900' : 'text-slate-900',
+    role: isDark ? 'text-slate-400' : isWarm ? 'text-amber-700/70' : 'text-slate-500',
+    body: isDark ? 'text-slate-300' : isWarm ? 'text-amber-800/80' : 'text-slate-600',
+    date: isDark ? 'text-slate-500' : isWarm ? 'text-amber-700/60' : 'text-slate-400',
   };
 }
 
-function ReviewCard({ review, template }: { review: typeof MOCK_REVIEWS[0]; template: string }) {
-  const cardClasses = getCardClasses(template);
+function getAnimationClass(animationStyle: string = 'slideUp', animations: boolean = true): string {
+  if (!animations) return '';
+  
+  switch (animationStyle) {
+    case 'fadeIn':
+      return 'animate-fadeIn';
+    case 'slideUp':
+      return 'animate-slideUp';
+    case 'scaleIn':
+      return 'animate-scaleIn';
+    default:
+      return 'animate-slideUp';
+  }
+}
+
+function ReviewCard({
+  review,
+  template,
+  shadowIntensity,
+  borderRadius,
+  showAvatar = true,
+  showDate = true,
+  starColor,
+  animationStyle,
+  animations,
+}: {
+  review: typeof MOCK_REVIEWS[0];
+  template: string;
+  shadowIntensity?: string;
+  borderRadius?: number;
+  showAvatar?: boolean;
+  showDate?: boolean;
+  starColor?: string;
+  animationStyle?: string;
+  animations?: boolean;
+}) {
+  const cardClasses = getCardClasses(template, shadowIntensity, borderRadius);
   const txt = getTextClasses(template);
+  const animationClass = getAnimationClass(animationStyle, animations);
 
   return (
     <div
-      className={`rounded-xl p-5 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 ${cardClasses}`}
+      className={`p-5 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 ${cardClasses} ${animationClass}`}
     >
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
-          {review.initials}
-        </div>
+        {showAvatar && (
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+            {review.initials}
+          </div>
+        )}
         <div className="min-w-0">
           <div className={`font-semibold text-sm ${txt.name}`}>{review.name}</div>
           <div className={`text-xs ${txt.role}`}>{review.role}</div>
         </div>
       </div>
-      <Stars rating={review.rating} />
+      <Stars rating={review.rating} starColor={starColor} />
       <p className={`text-sm mt-2 leading-relaxed line-clamp-3 ${txt.body}`}>{review.text}</p>
-      <div className={`text-xs mt-3 ${txt.date}`}>{review.date}</div>
+      {showDate && <div className={`text-xs mt-3 ${txt.date}`}>{review.date}</div>}
     </div>
   );
 }
 
-export default function WidgetPreview({ layout, template, maxReviews }: WidgetPreviewProps) {
-  const [carouselIndex, setCarouselIndex] = useState(0);
+export default function WidgetPreview({
+  layout,
+  template,
+  maxReviews,
+  animations = true,
+  primaryColor = '#7C3AED',
+  borderRadius = 12,
+  shadowIntensity = 'Soft',
+  cardSpacing = 16,
+  showAvatar = true,
+  showDate = true,
+  animationStyle = 'slideUp',
+  starColor = '#F59E0B',
+  colorScheme = 'auto',
+}: WidgetPreviewProps) {
   const reviews = MOCK_REVIEWS.slice(0, maxReviews);
-  const containerBg = getContainerBg(template);
-
-  const prev = () => setCarouselIndex((i) => (i - 1 + reviews.length) % reviews.length);
-  const next = () => setCarouselIndex((i) => (i + 1) % reviews.length);
+  const containerBg = getContainerBg(template, colorScheme);
+  const gapStyle = { gap: `${cardSpacing}px` };
 
   return (
-    <div className={`rounded-xl p-6 min-h-[350px] ${containerBg}`}>
+    <div className={`p-4 min-h-full ${containerBg}`}>
       {layout === 'carousel' && reviews.length > 0 && (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center" style={gapStyle}>
           <div className="w-full max-w-sm">
-            <ReviewCard review={reviews[carouselIndex % reviews.length]} template={template} />
+            <ReviewCard
+              review={reviews[0]}
+              template={template}
+              shadowIntensity={shadowIntensity}
+              borderRadius={borderRadius}
+              showAvatar={showAvatar}
+              showDate={showDate}
+              starColor={starColor}
+              animationStyle={animationStyle}
+              animations={animations}
+            />
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={prev}
-              className="w-8 h-8 rounded-full bg-slate-800/60 text-white flex items-center justify-center hover:bg-violet-600 transition-colors text-sm"
-            >
-              ‹
-            </button>
-            <span className="text-xs text-slate-400">
-              {carouselIndex + 1} / {reviews.length}
-            </span>
-            <button
-              onClick={next}
-              className="w-8 h-8 rounded-full bg-slate-800/60 text-white flex items-center justify-center hover:bg-violet-600 transition-colors text-sm"
-            >
-              ›
-            </button>
+            <span className="text-xs text-slate-400">1 / {reviews.length}</span>
           </div>
         </div>
       )}
 
       {layout === 'grid' && (
-        <div className="grid grid-cols-2 gap-4">
-          {reviews.map((review, i) => (
-            <ReviewCard key={i} review={review} template={template} />
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={gapStyle}>
+          {reviews.slice(0, 4).map((review, i) => (
+            <ReviewCard
+              key={i}
+              review={review}
+              template={template}
+              shadowIntensity={shadowIntensity}
+              borderRadius={borderRadius}
+              showAvatar={showAvatar}
+              showDate={showDate}
+              starColor={starColor}
+              animationStyle={animationStyle}
+              animations={animations}
+            />
           ))}
         </div>
       )}
 
       {layout === 'list' && (
-        <div className="flex flex-col gap-4">
-          {reviews.map((review, i) => (
-            <ReviewCard key={i} review={review} template={template} />
+        <div className="flex flex-col" style={gapStyle}>
+          {reviews.slice(0, 3).map((review, i) => (
+            <ReviewCard
+              key={i}
+              review={review}
+              template={template}
+              shadowIntensity={shadowIntensity}
+              borderRadius={borderRadius}
+              showAvatar={showAvatar}
+              showDate={showDate}
+              starColor={starColor}
+              animationStyle={animationStyle}
+              animations={animations}
+            />
           ))}
         </div>
       )}
 
       {layout === 'badge' && reviews.length > 0 && (
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex flex-col items-end" style={gapStyle}>
           <div className="w-full max-w-xs">
-            <ReviewCard review={reviews[0]} template={template} />
+            <ReviewCard
+              review={reviews[0]}
+              template={template}
+              shadowIntensity={shadowIntensity}
+              borderRadius={borderRadius}
+              showAvatar={showAvatar}
+              showDate={showDate}
+              starColor={starColor}
+              animationStyle={animationStyle}
+              animations={animations}
+            />
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-violet-600 text-white text-sm font-medium shadow-lg">
-            <span className="text-amber-300">★</span>
+          <div
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-medium shadow-lg"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <span>★</span>
             <span>4.8</span>
-            <span className="text-violet-200">·</span>
+            <span className="opacity-70">·</span>
             <span>{reviews.length} reviews</span>
           </div>
         </div>
@@ -197,10 +322,13 @@ export default function WidgetPreview({ layout, template, maxReviews }: WidgetPr
           <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-violet-600/80 text-[10px] text-white font-medium">
             → scrolling
           </div>
-          <div className="flex gap-3 animate-pulse">
+          <div className="flex" style={{ gap: `${cardSpacing}px` }}>
             {reviews.slice(0, 3).map((review, i) => (
-              <div key={i} className={`flex-shrink-0 rounded-lg p-3 min-w-[180px] ${getCardClasses(template)}`}>
-                <Stars rating={review.rating} />
+              <div
+                key={i}
+                className={`flex-shrink-0 rounded-lg p-3 min-w-[180px] ${getCardClasses(template, shadowIntensity, borderRadius)}`}
+              >
+                <Stars rating={review.rating} starColor={starColor} />
                 <p className={`text-xs mt-1 ${getTextClasses(template).body}`}>
                   {review.text.slice(0, 60)}...
                 </p>
@@ -212,20 +340,33 @@ export default function WidgetPreview({ layout, template, maxReviews }: WidgetPr
       )}
 
       {layout === 'masonry' && (
-        <div style={{ columnCount: 2, columnGap: '1rem' }}>
-          {reviews.map((review, i) => (
-            <div key={i} className="mb-4 break-inside-avoid">
-              <ReviewCard review={review} template={template} />
+        <div className="grid grid-cols-2" style={gapStyle}>
+          {reviews.slice(0, 4).map((review, i) => (
+            <div key={i} className="break-inside-avoid">
+              <ReviewCard
+                review={review}
+                template={template}
+                shadowIntensity={shadowIntensity}
+                borderRadius={borderRadius}
+                showAvatar={showAvatar}
+                showDate={showDate}
+                starColor={starColor}
+                animationStyle={animationStyle}
+                animations={animations}
+              />
             </div>
           ))}
         </div>
       )}
 
       {layout === 'wall' && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3" style={{ gap: `${Math.max(4, cardSpacing / 4)}px` }}>
           {reviews.map((review, i) => (
-            <div key={i} className={`rounded-lg p-2.5 text-xs hover:shadow-lg transition-shadow ${getCardClasses(template)}`}>
-              <Stars rating={review.rating} />
+            <div
+              key={i}
+              className={`rounded-lg p-2.5 text-xs hover:shadow-lg transition-shadow ${getCardClasses(template, shadowIntensity, borderRadius)}`}
+            >
+              <Stars rating={review.rating} starColor={starColor} />
               <p className={`mt-1 leading-snug ${getTextClasses(template).body}`}>
                 {review.text.slice(0, 80)}...
               </p>
@@ -237,8 +378,13 @@ export default function WidgetPreview({ layout, template, maxReviews }: WidgetPr
 
       {layout === 'spotlight' && reviews.length > 0 && (
         <div className="flex flex-col items-center text-center px-4">
-          <span className="text-5xl text-violet-500 font-serif leading-none mb-2">&ldquo;</span>
-          <Stars rating={reviews[0].rating} />
+          <span
+            className="text-5xl font-serif leading-none mb-2"
+            style={{ color: primaryColor }}
+          >
+            &ldquo;
+          </span>
+          <Stars rating={reviews[0].rating} starColor={starColor} />
           <p className={`text-base mt-3 leading-relaxed max-w-sm ${getTextClasses(template).body}`}>
             {reviews[0].text}
           </p>
@@ -250,11 +396,16 @@ export default function WidgetPreview({ layout, template, maxReviews }: WidgetPr
       )}
 
       {layout === 'summary' && (
-        <div className={`rounded-xl p-6 max-w-sm mx-auto ${getCardClasses(template)}`}>
+        <div className={`rounded-xl p-6 max-w-sm mx-auto ${getCardClasses(template, shadowIntensity, borderRadius)}`}>
           <div className="flex items-center gap-3 mb-4">
-            <span className={`text-4xl font-bold ${getTextClasses(template).name}`}>4.8</span>
+            <span
+              className="text-4xl font-bold"
+              style={{ color: primaryColor }}
+            >
+              4.8
+            </span>
             <div>
-              <Stars rating={5} />
+              <Stars rating={5} starColor={starColor} />
               <div className={`text-xs mt-0.5 ${getTextClasses(template).role}`}>Based on {reviews.length} reviews</div>
             </div>
           </div>
@@ -269,7 +420,10 @@ export default function WidgetPreview({ layout, template, maxReviews }: WidgetPr
               <div key={row.stars} className="flex items-center gap-2 text-xs">
                 <span className={`w-3 text-right ${getTextClasses(template).role}`}>{row.stars}</span>
                 <div className={`flex-1 h-2 rounded-full overflow-hidden ${template === 'darkElegant' || template === 'glass' ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                  <div className="h-full bg-amber-400 rounded-full" style={{ width: `${row.pct}%` }} />
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${row.pct}%`, backgroundColor: starColor }}
+                  />
                 </div>
                 <span className={`w-8 text-right ${getTextClasses(template).role}`}>{row.pct}%</span>
               </div>
