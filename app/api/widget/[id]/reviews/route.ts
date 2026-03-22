@@ -60,7 +60,13 @@ async function getCachedReviews(placeId: string): Promise<ReviewData | null> {
   const redis = getRedis();
   if (!redis) return null;
   try {
-    return await redis.get<ReviewData>(`reviews:${placeId}`);
+    // The value might be stored as a string (from REST API) or an object (from SDK)
+    const raw = await redis.get(`reviews:${placeId}`);
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+      try { return JSON.parse(raw) as ReviewData; } catch { return null; }
+    }
+    return raw as ReviewData;
   } catch {
     return null;
   }
@@ -169,6 +175,11 @@ export async function GET(
       }
     }
   } else {
+    data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
+  }
+
+  // Ensure data has reviews (defensive fallback)
+  if (!data || !Array.isArray(data.reviews)) {
     data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
   }
 
