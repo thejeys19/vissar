@@ -41,7 +41,7 @@ export default async function DashboardPage() {
         </div>
         {atLimit ? (
           <Button asChild className="bg-amber-500 hover:bg-amber-600 shrink-0">
-            <Link href="/pricing">Upgrade to Add More</Link>
+            <Link href="/dashboard/billing">Upgrade to Add More</Link>
           </Button>
         ) : (
           <Button asChild className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shrink-0">
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
             </div>
             {usagePct > 80 && (
               <p className="text-xs text-amber-400">
-                Running low — <Link href="/pricing" className="underline hover:text-amber-300">upgrade for more views</Link>
+                Running low — <Link href="/dashboard/billing" className="underline hover:text-amber-300">upgrade for more views</Link>
               </p>
             )}
           </div>

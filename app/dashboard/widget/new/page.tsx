@@ -218,10 +218,17 @@ export default function NewWidgetPage() {
   };
 
   const handleSubmit = async () => {
+    const id = await saveWidget();
+    if (id) router.push('/dashboard');
+  };
+
+  const widgetSlug = widgetId || 'my-widget';
+
+  const saveWidget = async (): Promise<string | null> => {
     if (!config.name.trim()) {
       alert('Please enter a widget name');
       setStep(1);
-      return;
+      return null;
     }
     setIsSaving(true);
     try {
@@ -234,16 +241,20 @@ export default function NewWidgetPage() {
       if (!response.ok) throw new Error('Failed to save');
       const saved = await response.json();
       if (!widgetId) setWidgetId(saved.id);
-      router.push('/dashboard');
+      return saved.id;
     } catch (error) {
       console.error('Error saving widget:', error);
       alert('Failed to save widget. Please try again.');
+      return null;
     } finally {
       setIsSaving(false);
     }
   };
 
-  const widgetSlug = widgetId || config.name.toLowerCase().replace(/\s+/g, '-') || 'my-widget';
+  const goToStep3 = async () => {
+    const id = await saveWidget();
+    if (id) setStep(3);
+  };
 
   const shortCode = `<div data-vissar-widget="${widgetSlug}" data-vissar-layout="${config.layout}" data-vissar-max-reviews="${config.maxReviews}"${config.injectSchema ? ' data-vissar-schema="true"' : ''}${!config.showReplies ? ' data-vissar-show-replies="false"' : ''}${config.gdprMode ? ' data-vissar-gdpr="true"' : ''}></div>\n<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
 
@@ -893,7 +904,7 @@ export default function NewWidgetPage() {
                         ) : (
                           <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 border-dashed text-center">
                             <p className="text-xs text-slate-500">Custom CSS is available on the Business plan</p>
-                            <a href="/pricing" className="text-xs text-violet-400 hover:underline mt-1 inline-block">Upgrade →</a>
+                            <a href="/dashboard/billing" className="text-xs text-violet-400 hover:underline mt-1 inline-block">Upgrade →</a>
                           </div>
                         )}
                       </div>
@@ -1097,10 +1108,11 @@ export default function NewWidgetPage() {
                     <ChevronLeft className="w-4 h-4" /> Back
                   </button>
                   <button
-                    onClick={() => setStep(3)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium transition-colors"
+                    onClick={goToStep3}
+                    disabled={isSaving}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium transition-colors disabled:opacity-50"
                   >
-                    Next: Get Code <ChevronRight className="w-4 h-4" />
+                    {isSaving ? 'Saving...' : <><span>Next: Get Code</span><ChevronRight className="w-4 h-4" /></>}
                   </button>
                 </div>
               </div>
@@ -1128,10 +1140,14 @@ export default function NewWidgetPage() {
                     </button>
                   </div>
                   <div className="p-3 sm:p-4 overflow-x-auto">
+                    {!widgetId ? (
+                    <div className="p-4 text-center text-slate-400 text-sm">Saving widget, please wait...</div>
+                  ) : (
                     <code className="text-xs sm:text-sm text-green-400 font-mono">
-                      <span className="block break-all">{`<div data-vissar-widget="${widgetSlug}" data-vissar-layout="${config.layout}" data-vissar-max-reviews="${config.maxReviews}"${config.injectSchema ? ' data-vissar-schema="true"' : ''}></div>`}</span>
+                      <span className="block break-all">{`<div data-vissar-widget="${widgetId}" data-vissar-layout="${config.layout}" data-vissar-max-reviews="${config.maxReviews}"${config.injectSchema ? ' data-vissar-schema="true"' : ''}></div>`}</span>
                       <span className="block break-all mt-1">{`<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`}</span>
                     </code>
+                  )}
                   </div>
                 </div>
 

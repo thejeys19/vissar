@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 import { getWidget } from '@/lib/db';
+import { getUserPlanAsync, planLimitForTier } from '@/lib/plans';
 import { MOCK_REVIEWS, MOCK_BUSINESS } from '@/lib/mock-data';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
@@ -189,12 +190,39 @@ export async function GET(
     .filter((r: { rating: number }) => r.rating >= minRating)
     .slice(0, maxReviews);
 
+  // Get user plan for tier/viewLimit
+  const userEmail = widget.userId || (widget as {userEmail?: string}).userEmail || '';
+  const plan = await getUserPlanAsync(userEmail);
+  const tier = plan.plan || 'free';
+  const viewLimit = planLimitForTier(tier);
+
   return NextResponse.json({
     widget: {
       id: widget.id,
       name: widget.name,
       layout: widget.layout,
       autoStyle: widget.autoStyle,
+      tier,
+      viewLimit,
+      removeBranding: widget.removeBranding ?? false,
+      template: widget.template,
+      showHeader: widget.showHeader ?? false,
+      showHighlights: widget.showHighlights ?? false,
+      showVerifiedBadge: widget.showVerifiedBadge ?? true,
+      showAvatar: widget.showAvatar ?? true,
+      showDate: widget.showDate ?? true,
+      animations: widget.animations ?? true,
+      animationStyle: widget.animationStyle ?? 'slideUp',
+      colorScheme: widget.colorScheme ?? 'auto',
+      sortBy: widget.sortBy ?? null,
+      textLength: widget.textLength ?? 150,
+      starColor: widget.starColor ?? null,
+      primaryColor: widget.primaryColor ?? null,
+      language: widget.language ?? 'all',
+      dateRange: widget.dateRange ?? 'all',
+      showSentimentBadges: widget.showSentimentBadges ?? true,
+      showReplies: widget.showReplies ?? true,
+      customCss: widget.customCss ?? null,
     },
     business: data.business,
     reviews: filteredReviews,

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/components/checkout-button";
@@ -106,6 +107,11 @@ function StarRating({ count = 5 }: { count?: number }) {
 
 export default function LandingPage() {
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+
+  // Smart CTA: if signed in → dashboard, else → sign in
+  const ctaHref = session ? "/dashboard/widget/new" : "/auth/signin";
+  const dashboardHref = session ? "/dashboard" : "/auth/signin";
 
   useEffect(() => {
     const ref = searchParams.get("ref");
@@ -131,11 +137,11 @@ export default function LandingPage() {
               <a href="#reviews" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Reviews</a>
             </nav>
             <div className="flex items-center gap-3">
-              <Link href="/dashboard" className="hidden sm:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5">
-                Sign In
+              <Link href={dashboardHref} className="hidden sm:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5">
+                {session ? "Dashboard" : "Sign In"}
               </Link>
               <Button size="sm" asChild className="bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
-                <Link href="/widget/new">Get Started Free</Link>
+                <Link href={ctaHref}>{session ? "Go to Dashboard" : "Get Started Free"}</Link>
               </Button>
             </div>
           </div>
@@ -204,7 +210,7 @@ export default function LandingPage() {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button size="lg" asChild className="bg-violet-600 hover:bg-violet-700 text-white text-base px-8 h-12 shadow-lg shadow-violet-500/20">
-                  <Link href="/widget/new">
+                  <Link href={ctaHref}>
                     Create Free Widget
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
@@ -332,7 +338,7 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Marquee */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-slate-800 rounded-xl p-4 mb-4 overflow-hidden h-24 flex items-center">
                   <div className="flex gap-3 animate-pulse">
@@ -350,7 +356,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Masonry */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-slate-800 rounded-xl p-3 mb-4 h-24" style={{columnCount: 2, columnGap: '8px'}}>
                   <div className="bg-slate-700 rounded-lg p-2 mb-2 break-inside-avoid"><div className="h-2 w-full bg-slate-600 rounded mb-1"/><div className="h-2 w-3/4 bg-slate-600 rounded"/></div>
@@ -363,7 +369,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Wall of Love */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-slate-800 rounded-xl p-3 mb-4 h-24 grid grid-cols-4 gap-1.5">
                   {Array.from({length: 8}).map((_, i) => (
@@ -379,7 +385,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Spotlight */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-slate-800 rounded-xl p-4 mb-4 h-24 flex flex-col items-center justify-center text-center">
                   <span className="text-2xl text-violet-400 font-serif leading-none mb-1">&ldquo;</span>
@@ -393,7 +399,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Summary */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-slate-800 rounded-xl p-4 mb-4 h-24 flex flex-col justify-center">
                   <div className="flex items-center gap-2 mb-2">
@@ -445,7 +451,7 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Soft Shadow */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-white rounded-xl p-5 shadow-lg shadow-slate-200/50 mb-4">
                   <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
@@ -459,7 +465,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Glassmorphism */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-gradient-to-br from-violet-500/10 to-blue-500/10 backdrop-blur rounded-xl p-5 border border-white/10 mb-4">
                   <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
@@ -473,7 +479,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Minimal */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-white rounded-xl p-5 border-2 border-slate-200 mb-4">
                   <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
@@ -487,7 +493,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Dark Elegant */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-slate-800 rounded-xl p-5 border border-slate-700 mb-4">
                   <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
@@ -501,7 +507,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Gradient Border */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-white rounded-xl p-5 border-2 border-violet-500 mb-4">
                   <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
@@ -515,7 +521,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Neon */}
-            <Link href="/widget/new" className="group">
+            <Link href={ctaHref} className="group">
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
                 <div className="bg-slate-900 rounded-xl p-5 border border-cyan-400/60 shadow-[0_0_15px_rgba(34,211,238,0.15)] mb-4">
                   <div className="flex gap-0.5 mb-2">{[1,2,3,4,5].map(i=><div key={i} className="w-3 h-3 rounded-full bg-amber-400"/>)}</div>
@@ -624,7 +630,7 @@ export default function LandingPage() {
                         : "bg-violet-600 text-white hover:bg-violet-700"
                     }`}
                   >
-                    <Link href={plan.href!}>{plan.cta}</Link>
+                    <Link href={ctaHref}>{plan.cta}</Link>
                   </Button>
                 )}
               </div>
@@ -728,7 +734,7 @@ export default function LandingPage() {
             Join 500+ businesses showing Google Reviews that look like they were made for their site — not copy-pasted from the web.
           </p>
           <Button size="lg" asChild className="bg-white text-violet-700 hover:bg-slate-100 text-lg px-12 h-14 shadow-2xl font-bold">
-            <Link href="/widget/new">
+            <Link href={ctaHref}>
               Create Your Free Widget
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
@@ -749,9 +755,9 @@ export default function LandingPage() {
             <nav className="flex items-center gap-6">
               <a href="#features" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Features</a>
               <a href="#pricing" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Pricing</a>
-              <Link href="/docs/api" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">API</Link>
+              <Link href="/dashboard/integrations" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">API</Link>
               <Link href="/terms" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Terms</Link>
-              <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">Sign In</Link>
+              <Link href={dashboardHref} className="text-sm text-slate-500 hover:text-slate-300 transition-colors">{session ? "Dashboard" : "Sign In"}</Link>
             </nav>
             <p className="text-slate-600 text-sm">© 2026 Vissar. All rights reserved.</p>
           </div>

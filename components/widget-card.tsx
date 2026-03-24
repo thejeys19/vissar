@@ -13,6 +13,7 @@ interface WidgetCardProps {
     layout: string;
     template: string;
     maxReviews: number;
+    minRating?: number;
   };
 }
 
@@ -34,7 +35,7 @@ export default function WidgetCard({ widget }: WidgetCardProps) {
   }, [widget.id]);
 
   const handleCopy = () => {
-    const code = `<div data-vissar-widget="${widget.id}" data-vissar-layout="${widget.layout}" data-vissar-max-reviews="${widget.maxReviews}"></div>\n<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
+    const code = `<div data-vissar-widget="${widget.id}" data-vissar-layout="${widget.layout}" data-vissar-template="${widget.template}" data-vissar-max-reviews="${widget.maxReviews}" data-vissar-min-rating="${widget.minRating ?? 1}"></div>\n<script src="https://www.vissar.com/widget/vissar-widget.min.js" async></script>`;
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

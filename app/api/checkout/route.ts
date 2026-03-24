@@ -28,7 +28,6 @@ export async function POST(request: Request) {
       customer_email: email,
       line_items: [{ price: plan.priceId, quantity: 1 }],
       mode: 'subscription',
-      payment_method_types: ['link'],
       success_url: `${baseUrl}/dashboard/billing?success=true`,
       cancel_url: `${baseUrl}/dashboard/billing?canceled=true`,
       metadata: { userId, planId, email },

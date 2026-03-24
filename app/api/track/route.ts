@@ -3,6 +3,16 @@ import { Redis } from '@upstash/redis';
 
 export const dynamic = "force-dynamic";
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
 function getRedis() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -16,11 +26,11 @@ export async function POST(request: Request) {
     const { widgetId, event } = body;
 
     if (!widgetId || !event) {
-      return NextResponse.json({ error: 'widgetId and event required' }, { status: 400 });
+      return NextResponse.json({ error: 'widgetId and event required' }, { status: 400, headers: corsHeaders });
     }
 
     if (event !== 'view' && event !== 'click') {
-      return NextResponse.json({ error: 'event must be "view" or "click"' }, { status: 400 });
+      return NextResponse.json({ error: 'event must be "view" or "click"' }, { status: 400, headers: corsHeaders });
     }
 
     const redis = getRedis();
@@ -39,9 +49,9 @@ export async function POST(request: Request) {
 
     await pipeline.exec();
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }, { headers: corsHeaders });
   } catch (error) {
     console.error('Track error:', error);
-    return NextResponse.json({ error: 'Tracking failed' }, { status: 500 });
+    return NextResponse.json({ error: 'Tracking failed' }, { status: 500, headers: corsHeaders });
   }
 }

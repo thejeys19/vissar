@@ -18,7 +18,7 @@ export function CheckoutButton({ planId, className, children }: CheckoutButtonPr
 
   const handleClick = async () => {
     if (!session) {
-      router.push("/auth/signin");
+      router.push("/auth/signin?callbackUrl=/dashboard/billing");
       return;
     }
     setLoading(true);
