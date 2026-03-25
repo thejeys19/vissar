@@ -237,7 +237,7 @@ export default function WidgetPreview({
   const isDark = ['glass', 'darkElegant', 'neon'].includes(template) || colorScheme === 'dark';
 
   return (
-    <div className={`p-4 min-h-full overflow-x-hidden w-full max-w-full ${containerBg}`}>
+    <div className={`p-4 min-h-full overflow-x-hidden w-full max-w-full flex flex-col ${containerBg}`}>
       {/* Custom section heading */}
       {showHeader && headerText && (
         <div className="mb-5 text-center">
@@ -393,40 +393,74 @@ export default function WidgetPreview({
       )}
 
       {(layout === 'wall-sm' || layout === 'wall-md' || layout === 'wall-lg') && (() => {
-        const cfg = layout === 'wall-sm'
-          ? { rows: 2, cardW: 130, textLen: 55, fontSize: 'text-[10px]' }
-          : layout === 'wall-lg'
-          ? { rows: 3, cardW: 180, textLen: 90, fontSize: 'text-[11px]' }
-          : { rows: 2, cardW: 155, textLen: 70, fontSize: 'text-xs' };
+        // wall-sm: compact, no avatar, 2 rows, narrow cards
+        // wall-md: medium cards, 2 rows, avatar + name + role
+        // wall-lg: full-size cards like grid layout, 3 rows, avatar + name + role
+        const isLg = layout === 'wall-lg';
+        const isMd = layout === 'wall-md';
+        const isSm = layout === 'wall-sm';
 
-        const perRow = Math.ceil(reviews.length / cfg.rows);
+        const cfg = isSm
+          ? { rows: 2, cardW: 150, textLen: 60, showAvatar: false, showRole: false, padding: 'p-2.5', fontSize: 'text-[10px]', nameSize: 'text-[10px]' }
+          : isMd
+          ? { rows: 2, cardW: 220, textLen: 90, showAvatar: true, showRole: true, padding: 'p-3', fontSize: 'text-xs', nameSize: 'text-xs' }
+          : { rows: 3, cardW: 280, textLen: 130, showAvatar: true, showRole: true, padding: 'p-4', fontSize: 'text-sm', nameSize: 'text-sm' };
+
+        // Distribute reviews across rows
+        const allReviews = [...reviews, ...reviews, ...reviews].slice(0, Math.max(reviews.length * 2, 8));
+        const perRow = Math.ceil(allReviews.length / cfg.rows);
         const rowSets = Array.from({ length: cfg.rows }, (_, i) =>
-          reviews.slice(i * perRow, (i + 1) * perRow)
+          allReviews.slice(i * perRow, (i + 1) * perRow)
         ).filter(r => r.length > 0);
 
         return (
-          <div className="flex flex-col gap-2 overflow-hidden w-full max-w-full">
+          <div className="flex flex-col justify-center gap-2 overflow-hidden w-full max-w-full flex-1">
             {rowSets.map((rowReviews, rowIdx) => (
               <div key={rowIdx} className="overflow-hidden w-full max-w-full">
                 <div
                   className="flex gap-2"
                   style={{
-                    animation: `vissar-preview-scroll-${rowIdx % 2} 12s linear infinite`,
+                    animation: `vissar-preview-scroll-${rowIdx % 2} ${isLg ? 18 : 14}s linear infinite`,
                     width: 'max-content',
-                    maxWidth: 'none',
                   }}
                 >
                   {[...rowReviews, ...rowReviews].map((review, i) => (
                     <div
                       key={i}
                       style={{ width: cfg.cardW, flex: `0 0 ${cfg.cardW}px` }}
-                      className={`rounded-lg p-2 hover:shadow-lg transition-shadow ${getCardClasses(template, shadowIntensity, borderRadius)}`}
+                      className={`rounded-xl hover:shadow-lg transition-shadow ${cfg.padding} ${getCardClasses(template, shadowIntensity, borderRadius)}`}
                     >
+                      {/* Avatar + name row for md/lg */}
+                      {cfg.showAvatar && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <div
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold shrink-0"
+                            style={{ fontSize: '10px', backgroundColor: primaryColor || '#7C3AED' }}
+                          >
+                            {review.initials}
+                          </div>
+                          <div className="min-w-0">
+                            <div className={`font-semibold truncate ${cfg.nameSize} ${getTextClasses(template).name}`}>
+                              {review.name}
+                            </div>
+                            {cfg.showRole && (
+                              <div className={`text-[10px] truncate ${getTextClasses(template).role}`}>
+                                {review.role}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       <Stars rating={review.rating} starColor={starColor} />
-                      <p className={`mt-1 leading-snug ${cfg.fontSize} ${getTextClasses(template).body}`}>
-                        {review.text.slice(0, cfg.textLen)}…
+                      <p className={`mt-1.5 leading-snug line-clamp-3 ${cfg.fontSize} ${getTextClasses(template).body}`}>
+                        {review.text.slice(0, cfg.textLen)}{review.text.length > cfg.textLen ? '…' : ''}
                       </p>
-                      <div className={`mt-1 font-semibold text-[10px] ${getTextClasses(template).name}`}>{review.name}</div>
+                      {/* Name at bottom for sm (no avatar) */}
+                      {!cfg.showAvatar && (
+                        <div className={`mt-1.5 font-semibold text-[10px] truncate ${getTextClasses(template).name}`}>
+                          {review.name}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
