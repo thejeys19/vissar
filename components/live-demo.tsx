@@ -22,12 +22,16 @@ const DEMO_TEMPLATES = [
 
 
 
+const DARK_TEMPLATES = ["darkElegant", "glass", "neon"];
+
 function initDemoWidget(container: HTMLDivElement, layout: string, template: string) {
   // Clear previous content
   container.innerHTML = "";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const VissarWidget = (window as any).VissarWidget;
+
+  const colorScheme = DARK_TEMPLATES.includes(template) ? "dark" : "light";
 
   const config = {
     widgetId: "demo",
@@ -37,7 +41,7 @@ function initDemoWidget(container: HTMLDivElement, layout: string, template: str
     placeId: "mock",
     animations: true,
     animationStyle: "slideUp",
-    colorScheme: "light",
+    colorScheme,
     tier: "pro",
     removeBranding: true,
     autoStyle: true,
@@ -91,9 +95,22 @@ export default function LiveDemo() {
 
   // Re-init widget whenever layout or template changes
   useEffect(() => {
+    if (!containerRef.current) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!containerRef.current || !(window as any).VissarWidget) return;
-    initDemoWidget(containerRef.current, layout, template);
+    const W = (window as any).VissarWidget;
+    if (W) {
+      initDemoWidget(containerRef.current, layout, template);
+    } else {
+      // Script still loading — wait for it then init
+      const wait = setInterval(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((window as any).VissarWidget && containerRef.current) {
+          clearInterval(wait);
+          initDemoWidget(containerRef.current, layout, template);
+        }
+      }, 100);
+      return () => clearInterval(wait);
+    }
   }, [layout, template]);
 
   return (
@@ -138,12 +155,15 @@ export default function LiveDemo() {
         </div>
       </div>
 
-      {/* Widget container */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-2xl shadow-slate-950/50 min-h-[200px]">
+      {/* Widget container — bg adapts to template */}
+      <div
+        className="rounded-2xl p-6 sm:p-8 shadow-2xl shadow-slate-950/50 min-h-[200px] transition-colors duration-300"
+        style={{ backgroundColor: DARK_TEMPLATES.includes(template) ? "#0f172a" : "#ffffff" }}
+      >
         <div ref={containerRef} />
       </div>
 
-      <div className="text-center">
+      <div className="text-center pb-8">
         <p className="text-slate-500 text-sm mb-4">
           This is your widget — on your site, it auto-detects your fonts, colors, and style.
         </p>
