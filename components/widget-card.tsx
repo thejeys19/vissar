@@ -65,18 +65,16 @@ export default function WidgetCard({ widget }: WidgetCardProps) {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={handleCopy}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hidden sm:flex items-center gap-1.5"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
             >
               {copied ? (
                 <><Check className="w-3.5 h-3.5 text-emerald-400" /><span className="text-emerald-400">Copied!</span></>
               ) : (
                 <><Code2 className="w-3.5 h-3.5" /> Get Code</>
               )}
-            </Button>
+            </button>
             <Button size="sm" asChild className="bg-violet-600 hover:bg-violet-700">
               <Link href={`/dashboard/widget/new?id=${widget.id}`}>Edit</Link>
             </Button>

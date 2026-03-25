@@ -32,9 +32,13 @@ export function CheckoutButton({ planId, className, children }: CheckoutButtonPr
           email: session.user?.email || "",
         }),
       });
-      const { url } = await res.json();
-      if (url) window.location.href = url;
-      else setLoading(false);
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Checkout failed. Please try again.");
+        setLoading(false);
+      }
     } catch {
       setLoading(false);
     }

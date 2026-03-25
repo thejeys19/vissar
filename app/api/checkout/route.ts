@@ -19,15 +19,20 @@ export async function POST(request: Request) {
     
     if (!plan || planId === 'free' || !plan.priceId) {
       console.error('Invalid plan or missing priceId:', planId, plan?.priceId);
-      return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
+      return NextResponse.json({ 
+        error: planId === 'lifetime' 
+          ? 'Lifetime deal not yet configured — contact support@vissar.com to purchase' 
+          : 'Invalid plan' 
+      }, { status: 400 });
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://www.vissar.com';
+    const mode = plan.mode || 'subscription';
 
     const session = await stripe.checkout.sessions.create({
       customer_email: email,
       line_items: [{ price: plan.priceId, quantity: 1 }],
-      mode: 'subscription',
+      mode,
       success_url: `${baseUrl}/dashboard/billing?success=true`,
       cancel_url: `${baseUrl}/dashboard/billing?canceled=true`,
       metadata: { userId, planId, email },

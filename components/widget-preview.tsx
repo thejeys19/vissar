@@ -237,7 +237,7 @@ export default function WidgetPreview({
   const isDark = ['glass', 'darkElegant', 'neon'].includes(template) || colorScheme === 'dark';
 
   return (
-    <div className={`p-4 min-h-full ${containerBg}`}>
+    <div className={`p-4 min-h-full overflow-x-hidden w-full max-w-full ${containerBg}`}>
       {/* Custom section heading */}
       {showHeader && headerText && (
         <div className="mb-5 text-center">
@@ -248,8 +248,8 @@ export default function WidgetPreview({
         </div>
       )}
       {layout === 'carousel' && reviews.length > 0 && (
-        <div className="flex flex-col items-center" style={gapStyle}>
-          <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center overflow-hidden w-full" style={gapStyle}>
+          <div className="w-full max-w-sm min-w-0">
             <ReviewCard
               review={reviews[0]}
               template={template}
@@ -334,21 +334,21 @@ export default function WidgetPreview({
       )}
 
       {layout === 'marquee' && (
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden w-full">
           <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full bg-violet-600/80 text-[10px] text-white font-medium">
             → scrolling
           </div>
-          <div className="flex" style={{ gap: `${cardSpacing}px` }}>
+          <div className="flex overflow-hidden w-full" style={{ gap: `${cardSpacing}px` }}>
             {reviews.slice(0, 3).map((review, i) => (
               <div
                 key={i}
-                className={`flex-shrink-0 rounded-lg p-3 min-w-[180px] ${getCardClasses(template, shadowIntensity, borderRadius)}`}
+                className={`flex-shrink-0 rounded-lg p-3 w-[160px] min-w-0 ${getCardClasses(template, shadowIntensity, borderRadius)}`}
               >
                 <Stars rating={review.rating} starColor={starColor} />
-                <p className={`text-xs mt-1 ${getTextClasses(template).body}`}>
+                <p className={`text-xs mt-1 line-clamp-2 ${getTextClasses(template).body}`}>
                   {review.text.slice(0, 60)}...
                 </p>
-                <div className={`text-xs mt-1 font-medium ${getTextClasses(template).name}`}>{review.name}</div>
+                <div className={`text-xs mt-1 font-medium truncate ${getTextClasses(template).name}`}>{review.name}</div>
               </div>
             ))}
           </div>
@@ -376,17 +376,17 @@ export default function WidgetPreview({
       )}
 
       {layout === 'wall' && (
-        <div className="grid grid-cols-3" style={{ gap: `${Math.max(4, cardSpacing / 4)}px` }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: `${Math.max(4, cardSpacing / 4)}px` }}>
           {reviews.map((review, i) => (
             <div
               key={i}
-              className={`rounded-lg p-2.5 text-xs hover:shadow-lg transition-shadow ${getCardClasses(template, shadowIntensity, borderRadius)}`}
+              className={`rounded-lg p-2.5 text-xs hover:shadow-lg transition-shadow min-w-0 overflow-hidden ${getCardClasses(template, shadowIntensity, borderRadius)}`}
             >
               <Stars rating={review.rating} starColor={starColor} />
-              <p className={`mt-1 leading-snug ${getTextClasses(template).body}`}>
+              <p className={`mt-1 leading-snug line-clamp-3 ${getTextClasses(template).body}`}>
                 {review.text.slice(0, 80)}...
               </p>
-              <div className={`mt-1 font-semibold text-[11px] ${getTextClasses(template).name}`}>{review.name}</div>
+              <div className={`mt-1 font-semibold text-[11px] truncate ${getTextClasses(template).name}`}>{review.name}</div>
             </div>
           ))}
         </div>
@@ -405,14 +405,15 @@ export default function WidgetPreview({
         ).filter(r => r.length > 0);
 
         return (
-          <div className="flex flex-col gap-2 overflow-hidden w-full">
+          <div className="flex flex-col gap-2 overflow-hidden w-full max-w-full">
             {rowSets.map((rowReviews, rowIdx) => (
-              <div key={rowIdx} className="overflow-hidden w-full">
+              <div key={rowIdx} className="overflow-hidden w-full max-w-full">
                 <div
                   className="flex gap-2"
                   style={{
                     animation: `vissar-preview-scroll-${rowIdx % 2} 12s linear infinite`,
                     width: 'max-content',
+                    maxWidth: 'none',
                   }}
                 >
                   {[...rowReviews, ...rowReviews].map((review, i) => (

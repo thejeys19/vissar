@@ -290,7 +290,7 @@ export default function NewWidgetPage() {
   const stepLabels = ['Configure', 'Style', 'Get Code'];
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden w-full max-w-full">
       {/* Page title */}
       <div className="mb-6 flex items-center gap-3">
         <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center gap-1">
@@ -375,7 +375,7 @@ export default function NewWidgetPage() {
                         <button
                           key={l.value}
                           onClick={() => setConfig({ ...config, layout: l.value })}
-                          className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                          className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left min-w-0 overflow-hidden w-full ${
                             isSelected
                               ? 'border-violet-500 bg-violet-500/10'
                               : 'border-slate-700 hover:border-slate-600 bg-slate-800/50'
@@ -964,7 +964,7 @@ export default function NewWidgetPage() {
                 {/* Animation Style */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-slate-300">Animation Style</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[
                       { value: 'none', label: 'None', desc: 'No animation' },
                       { value: 'fadeIn', label: 'Fade In', desc: 'Smooth opacity' },
@@ -990,12 +990,12 @@ export default function NewWidgetPage() {
                 {/* Color Scheme */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-slate-300">Color Scheme</label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {['auto', 'light', 'dark'].map((scheme) => (
                       <button
                         key={scheme}
                         onClick={() => setConfig({ ...config, colorScheme: scheme })}
-                        className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium capitalize transition-all ${
+                        className={`flex-1 min-w-[70px] px-3 py-2 rounded-lg border text-sm font-medium capitalize transition-all ${
                           config.colorScheme === scheme
                             ? 'border-violet-500 bg-violet-500/10 text-violet-300'
                             : 'border-slate-700 text-slate-500 hover:border-slate-600'
@@ -1235,7 +1235,7 @@ export default function NewWidgetPage() {
                 </div>
                 <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded-full">{config.template} · {config.layout}</span>
               </div>
-              <div className="h-[300px] sm:h-[400px] lg:h-[500px] overflow-y-auto mx-auto transition-all" style={{ maxWidth: previewSize === 'mobile' ? '375px' : previewSize === 'tablet' ? '768px' : '100%' }}>
+              <div className="h-[300px] sm:h-[400px] lg:h-[500px] overflow-y-auto overflow-x-hidden mx-auto transition-all" style={{ maxWidth: previewSize === 'mobile' ? '375px' : previewSize === 'tablet' ? '768px' : '100%' }}>
                 <WidgetPreview
                   layout={config.layout}
                   template={config.template}
