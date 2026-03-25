@@ -20,15 +20,14 @@ const DEMO_TEMPLATES = [
   { value: "gradientBorder", label: "Gradient" },
 ];
 
-declare global {
-  interface Window {
-    VissarWidget?: new (el: HTMLElement, config: Record<string, unknown>) => { init: () => void };
-  }
-}
+
 
 function initDemoWidget(container: HTMLDivElement, layout: string, template: string) {
   // Clear previous content
   container.innerHTML = "";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const VissarWidget = (window as any).VissarWidget;
 
   const config = {
     widgetId: "demo",
@@ -44,8 +43,8 @@ function initDemoWidget(container: HTMLDivElement, layout: string, template: str
     autoStyle: true,
   };
 
-  if (window.VissarWidget) {
-    new window.VissarWidget(container, config).init();
+  if (VissarWidget) {
+    new VissarWidget(container, config).init();
   } else {
     // Script not yet loaded — create the div and let the auto-init pick it up
     const div = document.createElement("div");
@@ -92,7 +91,8 @@ export default function LiveDemo() {
 
   // Re-init widget whenever layout or template changes
   useEffect(() => {
-    if (!containerRef.current || !window.VissarWidget) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!containerRef.current || !(window as any).VissarWidget) return;
     initDemoWidget(containerRef.current, layout, template);
   }, [layout, template]);
 
