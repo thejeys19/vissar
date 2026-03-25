@@ -49,11 +49,13 @@ export default function SettingsPage() {
     if (!name.trim()) return;
     setSaving(true);
     try {
-      await fetch("/api/user/settings", {
+      const res = await fetch("/api/user/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim() }),
       });
+      if (!res.ok) throw new Error("Save failed");
+      // Update the JWT token so the session reflects the new name immediately
       await update({ name: name.trim() });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);

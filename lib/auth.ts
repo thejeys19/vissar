@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { getUserByEmail } from "@/lib/db";
 
 // Extend session type
 declare module "next-auth" {
@@ -31,12 +32,27 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         (session.user as { id?: string }).id = token.sub;
+        // Use custom name from DB if set, otherwise fall back to token name
+        if (token.customName) {
+          session.user.name = token.customName as string;
+        }
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session: updateData }) {
       if (user) {
         token.id = user.id;
+        // On first sign-in, load custom name from DB
+        if (user.email) {
+          try {
+            const dbUser = await getUserByEmail(user.email);
+            if (dbUser?.name) token.customName = dbUser.name;
+          } catch {}
+        }
+      }
+      // When update() is called from the client with a new name
+      if (trigger === "update" && updateData?.name) {
+        token.customName = updateData.name;
       }
       return token;
     },
