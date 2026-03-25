@@ -420,7 +420,7 @@ export default function WidgetPreview({
                 <div
                   className="flex gap-2"
                   style={{
-                    animation: `vissar-preview-scroll-${rowIdx % 2} ${isLg ? 18 : 14}s linear infinite`,
+                    animation: `vissar-preview-scroll-0 ${isLg ? 20 : 16}s linear infinite`,
                     width: 'max-content',
                   }}
                 >
