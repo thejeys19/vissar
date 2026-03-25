@@ -20,24 +20,34 @@ const DEMO_TEMPLATES = [
   { value: "gradientBorder", label: "Gradient" },
 ];
 
-export default function LiveDemo() {
-  const [layout, setLayout] = useState("carousel");
-  const [template, setTemplate] = useState("soft");
-  const [widgetKey, setWidgetKey] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+declare global {
+  interface Window {
+    VissarWidget?: new (el: HTMLElement, config: Record<string, unknown>) => { init: () => void };
+  }
+}
 
-  // Reload widget when layout/template changes
-  useEffect(() => {
-    setWidgetKey(k => k + 1);
-  }, [layout, template]);
+function initDemoWidget(container: HTMLDivElement, layout: string, template: string) {
+  // Clear previous content
+  container.innerHTML = "";
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  const config = {
+    widgetId: "demo",
+    layout,
+    template,
+    maxReviews: 6,
+    placeId: "mock",
+    animations: true,
+    animationStyle: "slideUp",
+    colorScheme: "light",
+    tier: "pro",
+    removeBranding: true,
+    autoStyle: true,
+  };
 
-    // Clear previous widget
-    containerRef.current.innerHTML = "";
-
-    // Create widget container
+  if (window.VissarWidget) {
+    new window.VissarWidget(container, config).init();
+  } else {
+    // Script not yet loaded — create the div and let the auto-init pick it up
     const div = document.createElement("div");
     div.setAttribute("data-vissar-widget", "demo");
     div.setAttribute("data-vissar-layout", layout);
@@ -45,31 +55,46 @@ export default function LiveDemo() {
     div.setAttribute("data-vissar-max-reviews", "6");
     div.setAttribute("data-vissar-place-id", "mock");
     div.setAttribute("data-vissar-animations", "true");
-    div.setAttribute("data-vissar-animation-style", "slideUp");
     div.setAttribute("data-vissar-color-scheme", "light");
-    div.setAttribute("data-vissar-tier", "pro"); // no branding in demo
+    div.setAttribute("data-vissar-tier", "pro");
     div.setAttribute("data-vissar-remove-branding", "true");
-    containerRef.current.appendChild(div);
+    container.appendChild(div);
+  }
+}
 
-    // Load widget script fresh each time
-    const existingScript = document.getElementById("vissar-demo-script");
-    if (existingScript) existingScript.remove();
+export default function LiveDemo() {
+  const [layout, setLayout] = useState("carousel");
+  const [template, setTemplate] = useState("soft");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scriptLoadedRef = useRef(false);
 
-    // Remove old widget styles to force re-render
-    const oldStyles = document.querySelectorAll("style[data-vissar]");
-    oldStyles.forEach(s => s.remove());
+  // Load script once on mount
+  useEffect(() => {
+    if (scriptLoadedRef.current) return;
+    scriptLoadedRef.current = true;
+
+    if (window.VissarWidget) {
+      // Already loaded — init immediately
+      if (containerRef.current) initDemoWidget(containerRef.current, layout, template);
+      return;
+    }
 
     const script = document.createElement("script");
     script.id = "vissar-demo-script";
     script.src = "https://www.vissar.com/widget/vissar-widget.min.js";
     script.async = true;
-    document.head.appendChild(script);
-
-    return () => {
-      if (containerRef.current) containerRef.current.innerHTML = "";
+    script.onload = () => {
+      if (containerRef.current) initDemoWidget(containerRef.current, layout, template);
     };
+    document.head.appendChild(script);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [widgetKey]);
+  }, []);
+
+  // Re-init widget whenever layout or template changes
+  useEffect(() => {
+    if (!containerRef.current || !window.VissarWidget) return;
+    initDemoWidget(containerRef.current, layout, template);
+  }, [layout, template]);
 
   return (
     <div className="space-y-6">
