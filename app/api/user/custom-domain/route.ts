@@ -32,11 +32,33 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { domain } = body;
+  let { domain } = body;
+
+  // Allow clearing the domain
+  if (domain === '' || domain === null || domain === undefined) {
+    const redis = getRedis();
+    if (redis) {
+      await redis.set(`customDomain:${session.user.email}`, '');
+    }
+    return NextResponse.json({ success: true, domain: '' });
+  }
+
+  // Strip protocol and path — keep only the hostname
+  domain = String(domain)
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/.*$/, '')
+    .trim()
+    .toLowerCase();
+
+  // Validate domain format
+  const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+  if (!domainRegex.test(domain)) {
+    return NextResponse.json({ error: 'Invalid domain format' }, { status: 400 });
+  }
 
   const redis = getRedis();
   if (redis) {
-    await redis.set(`customDomain:${session.user.email}`, domain || '');
+    await redis.set(`customDomain:${session.user.email}`, domain);
   }
 
   return NextResponse.json({ success: true, domain });

@@ -7,20 +7,21 @@ import { getUserPlanAsync, setUserPlan, planLimitForTier } from '@/lib/plans';
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  
+
   const plan = await getUserPlanAsync(session.user.email);
   return NextResponse.json({ ...plan, email: session.user.email, name: session.user.name });
 }
 
-// POST to update plan (admin use or webhook)
+// POST to update plan — users can only modify their own plan
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await request.json();
-  const { plan, email } = body;
+  const { plan } = body;
 
-  const targetEmail = email || session.user.email;
+  // Always use the authenticated user's email — never accept email from client
+  const targetEmail = session.user.email;
 
   if (!['free', 'pro', 'business'].includes(plan)) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });

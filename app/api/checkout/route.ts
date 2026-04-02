@@ -1,35 +1,63 @@
 import { NextResponse } from 'next/server';
 import { stripe, PLANS, isStripeConfigured } from '@/lib/stripe';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
+import { NextRequest } from 'next/server';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 requests per minute per IP
+    const ip = getClientIp(request);
+    const { allowed, remaining } = await checkRateLimit(`checkout:${ip}`, 5, 60);
+
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: { 'Retry-After': '60', 'X-RateLimit-Remaining': String(remaining) },
+        }
+      );
+    }
+
     if (!isStripeConfigured) {
       console.error('Stripe not configured - missing STRIPE_SECRET_KEY');
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
     }
 
-    const body = await request.json();
-    const { planId, userId, email } = body;
+    // Require authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!planId || !userId || !email) {
+    const body = await request.json();
+    const { planId } = body;
+
+    // Use session values — never trust client-provided userId or email
+    const userId = (session.user as { id?: string })?.id || session.user.email;
+    const email = session.user.email;
+
+    if (!planId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const plan = PLANS[planId as keyof typeof PLANS];
-    
+
     if (!plan || planId === 'free' || !plan.priceId) {
       console.error('Invalid plan or missing priceId:', planId, plan?.priceId);
-      return NextResponse.json({ 
-        error: planId === 'lifetime' 
-          ? 'Lifetime deal not yet configured — contact support@vissar.com to purchase' 
-          : 'Invalid plan' 
+      return NextResponse.json({
+        error: planId === 'lifetime'
+          ? 'Lifetime deal not yet configured — contact support@vissar.com to purchase'
+          : 'Invalid plan'
       }, { status: 400 });
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://www.vissar.com';
     const mode = plan.mode || 'subscription';
 
-    const session = await stripe.checkout.sessions.create({
+    const stripeSession = await stripe.checkout.sessions.create({
       customer_email: email,
       line_items: [{ price: plan.priceId, quantity: 1 }],
       mode,
@@ -38,10 +66,9 @@ export async function POST(request: Request) {
       metadata: { userId, planId, email },
     });
 
-    return NextResponse.json({ sessionId: session.id, url: session.url });
+    return NextResponse.json({ sessionId: stripeSession.id, url: stripeSession.url });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error('Checkout error:', msg);
-    return NextResponse.json({ error: 'Checkout failed', detail: msg }, { status: 500 });
+    console.error('Checkout error:', error);
+    return NextResponse.json({ error: 'Checkout failed' }, { status: 500 });
   }
 }

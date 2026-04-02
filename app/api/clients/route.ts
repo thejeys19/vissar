@@ -29,9 +29,8 @@ export async function GET() {
     const clients = await redis.get<Client[]>(`clients:${userId}`) || [];
     return NextResponse.json({ clients });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error('GET /api/clients error:', msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error('GET /api/clients error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -63,8 +62,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newClient);
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error('POST /api/clients error:', msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error('POST /api/clients error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

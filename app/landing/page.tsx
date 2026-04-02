@@ -274,11 +274,11 @@ export default function LandingPage() {
       <section id="demo" className="py-24 bg-slate-950 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-violet-600/10 rounded-full blur-3xl" />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Live Demo</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">See it live. Right now.</h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">Toggle layouts and styles below — this is the actual Vissar widget running live.</p>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-10">
+            <span className="inline-block px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-sm font-medium text-violet-300 mb-4">Interactive Demo</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight">See it live — on <em>your</em> kind of site.</h2>
+            <p className="text-base text-slate-400 max-w-xl mx-auto">Pick a site type, choose a layout, switch styles. This is the real widget.</p>
           </div>
 
           <LiveDemo />

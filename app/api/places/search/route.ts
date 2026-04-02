@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 const MOCK_RESULTS = [
   { placeId: 'ChIJN1t_tDeuEmsRUsoyG83frY4', name: 'Google Sydney', address: '48 Pirrama Rd, Pyrmont NSW 2009, Australia' },
@@ -7,6 +10,26 @@ const MOCK_RESULTS = [
 ];
 
 export async function GET(request: NextRequest) {
+  // Rate limit: 10 requests per minute per IP
+  const ip = getClientIp(request);
+  const { allowed, remaining } = await checkRateLimit(`places:search:${ip}`, 10, 60);
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': '60', 'X-RateLimit-Remaining': String(remaining) },
+      }
+    );
+  }
+
+  // Require authentication
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const q = request.nextUrl.searchParams.get('q');
 
   if (!q || q.trim().length < 2) {

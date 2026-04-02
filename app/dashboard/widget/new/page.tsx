@@ -8,22 +8,22 @@ import { useSession } from 'next-auth/react';
 import WidgetPreview from '@/components/widget-preview';
 
 const LAYOUTS = [
-  { value: 'carousel', label: 'Carousel', description: 'Sliding cards', icon: Columns },
-  { value: 'grid', label: 'Grid', description: '2-column grid', icon: LayoutGrid },
-  { value: 'list', label: 'List', description: 'Vertical stack', icon: List },
-  { value: 'badge', label: 'Badge', description: 'Floating widget', icon: MessageCircle },
-  { value: 'marquee', label: 'Marquee', description: 'Auto-scrolling ticker', icon: MoveRight },
-  { value: 'masonry', label: 'Masonry', description: 'Pinterest-style grid', icon: Grid3X3 },
-  { value: 'wall', label: 'Wall of Love', description: 'Dense review mosaic', icon: Heart },
-  { value: 'wall-sm', label: 'Scrolling Wall S', description: '2 rows, compact cards', icon: Heart },
-  { value: 'wall-md', label: 'Scrolling Wall M', description: '2 rows, standard cards', icon: Heart },
-  { value: 'wall-lg', label: 'Scrolling Wall L', description: '3 rows, large cards', icon: Heart },
-  { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: CircleDot },
-  { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: Star },
-  { value: 'popup', label: 'Popup Button', description: 'Floating button → modal', icon: MessageCircle },
-  { value: 'quote', label: 'Single Quote', description: 'Rotating hero quote', icon: MessageCircle },
-  { value: 'comparison', label: 'Side-by-Side', description: 'Two reviews, editorial feel', icon: Columns },
-  { value: 'mobile-stack', label: 'Mobile Stack', description: 'Single column, mobile-optimized', icon: List },
+  { value: 'carousel', label: 'Carousel', description: 'Sliding cards', icon: Columns, tier: 'free' },
+  { value: 'grid', label: 'Grid', description: '2-column grid', icon: LayoutGrid, tier: 'free' },
+  { value: 'list', label: 'List', description: 'Vertical stack', icon: List, tier: 'free' },
+  { value: 'wall-sm', label: 'Scrolling Wall S', description: '2 rows, compact cards', icon: Heart, tier: 'free' },
+  { value: 'wall-md', label: 'Scrolling Wall M', description: '2 rows, standard cards', icon: Heart, tier: 'pro' },
+  { value: 'wall-lg', label: 'Scrolling Wall L', description: '3 rows, large cards', icon: Heart, tier: 'pro' },
+  { value: 'marquee', label: 'Marquee', description: 'Auto-scrolling ticker', icon: MoveRight, tier: 'pro' },
+  { value: 'masonry', label: 'Masonry', description: 'Pinterest-style grid', icon: Grid3X3, tier: 'pro' },
+  { value: 'wall', label: 'Wall of Love', description: 'Dense review mosaic', icon: Heart, tier: 'pro' },
+  { value: 'spotlight', label: 'Spotlight', description: 'One cinematic review', icon: CircleDot, tier: 'pro' },
+  { value: 'summary', label: 'Summary', description: 'Rating overview card', icon: Star, tier: 'pro' },
+  { value: 'popup', label: 'Popup Button', description: 'Floating button → modal', icon: MessageCircle, tier: 'pro' },
+  { value: 'quote', label: 'Single Quote', description: 'Rotating hero quote', icon: MessageCircle, tier: 'pro' },
+  { value: 'badge', label: 'Badge', description: 'Floating widget', icon: MessageCircle, tier: 'business' },
+  { value: 'comparison', label: 'Side-by-Side', description: 'Two reviews, editorial feel', icon: Columns, tier: 'business' },
+  { value: 'mobile-stack', label: 'Mobile Stack', description: 'Single column, mobile-optimized', icon: List, tier: 'pro' },
 ];
 
 const TEMPLATES = [
@@ -371,26 +371,37 @@ export default function NewWidgetPage() {
                     {LAYOUTS.map((l) => {
                       const Icon = l.icon;
                       const isSelected = config.layout === l.value;
+                      const isLocked = (l.tier === 'pro' && userPlan === 'free') || (l.tier === 'business' && userPlan !== 'business');
                       return (
                         <button
                           key={l.value}
-                          onClick={() => setConfig({ ...config, layout: l.value })}
-                          className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left min-w-0 overflow-hidden w-full ${
-                            isSelected
+                          onClick={() => {
+                            if (isLocked) return; // don't select locked layouts
+                            setConfig({ ...config, layout: l.value });
+                          }}
+                          className={`relative flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left min-w-0 overflow-hidden w-full ${
+                            isLocked
+                              ? 'border-slate-700 bg-slate-800/30 opacity-60 cursor-not-allowed'
+                              : isSelected
                               ? 'border-violet-500 bg-violet-500/10'
                               : 'border-slate-700 hover:border-slate-600 bg-slate-800/50'
                           }`}
                         >
                           <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              isSelected ? 'bg-violet-600 text-white' : 'bg-slate-700 text-slate-400'
+                            className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                              isLocked ? 'bg-slate-700 text-slate-600' : isSelected ? 'bg-violet-600 text-white' : 'bg-slate-700 text-slate-400'
                             }`}
                           >
-                            {Icon ? <Icon className="w-5 h-5" /> : null}
+                            {isLocked ? <Lock className="w-4 h-4" /> : Icon ? <Icon className="w-5 h-5" /> : null}
                           </div>
-                          <div>
-                            <div className={`font-medium text-sm ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                          <div className="min-w-0 flex-1">
+                            <div className={`font-medium text-sm flex items-center gap-1.5 ${isLocked ? 'text-slate-500' : isSelected ? 'text-white' : 'text-slate-300'}`}>
                               {l.label}
+                              {isLocked && (
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${l.tier === 'business' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-violet-500/20 text-violet-400 border border-violet-500/30'}`}>
+                                  {l.tier === 'business' ? 'BUSINESS' : 'PRO'}
+                                </span>
+                              )}
                             </div>
                             <div className="text-xs text-slate-500">{l.description}</div>
                           </div>
@@ -398,6 +409,12 @@ export default function NewWidgetPage() {
                       );
                     })}
                   </div>
+                  {LAYOUTS.some(l => (l.tier === 'pro' && userPlan === 'free') || (l.tier === 'business' && userPlan !== 'business')) && (
+                    <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                      <Lock className="w-3 h-3" />
+                      <a href="/dashboard/billing" className="text-violet-400 hover:underline">Upgrade to Pro</a> to unlock more layouts
+                    </p>
+                  )}
                 </div>
 
                 {/* Max Reviews Slider */}
@@ -912,12 +929,24 @@ export default function NewWidgetPage() {
                   )}
                 </div>
 
-                <button
-                  onClick={() => setStep(2)}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium transition-colors"
-                >
-                  Next: Style <ChevronRight className="w-4 h-4" />
-                </button>
+                {(() => {
+                  const selectedLayout = LAYOUTS.find(l => l.value === config.layout);
+                  const selectedIsLocked = selectedLayout ? ((selectedLayout.tier === 'pro' && userPlan === 'free') || (selectedLayout.tier === 'business' && userPlan !== 'business')) : false;
+                  return (
+                    <button
+                      onClick={() => {
+                        if (selectedIsLocked) {
+                          window.location.href = '/dashboard/billing';
+                          return;
+                        }
+                        setStep(2);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium transition-colors"
+                    >
+                      {selectedIsLocked ? <><Lock className="w-4 h-4" /> Upgrade to Use This Layout</> : <>Next: Style <ChevronRight className="w-4 h-4" /></>}
+                    </button>
+                  );
+                })()}
               </div>
             )}
 
@@ -1204,7 +1233,7 @@ export default function NewWidgetPage() {
           </div>
 
           {/* Right Panel - Live Preview (always visible, scrolls on mobile) */}
-          <div className="lg:sticky lg:top-8 lg:self-start">
+          <div className="lg:sticky lg:top-8 lg:self-start min-w-0 overflow-hidden">
             {/* Preview Size Toggle */}
             <div className="flex justify-center gap-2 mb-3">
               {[
@@ -1235,7 +1264,19 @@ export default function NewWidgetPage() {
                 </div>
                 <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded-full">{config.template} · {config.layout}</span>
               </div>
-              <div className="h-[300px] sm:h-[400px] lg:h-[500px] overflow-y-auto overflow-x-hidden mx-auto transition-all" style={{ maxWidth: previewSize === 'mobile' ? '375px' : previewSize === 'tablet' ? '768px' : '100%' }}>
+              <div
+                className="overflow-y-auto overflow-x-hidden mx-auto transition-all w-full"
+                style={{
+                  maxWidth: previewSize === 'mobile' ? '375px' : previewSize === 'tablet' ? '768px' : '100%',
+                  contain: 'layout paint',
+                  minHeight: ['wall-sm', 'wall-md', 'wall-lg'].includes(config.layout)
+                    ? (config.layout === 'wall-lg' ? '520px' : '380px')
+                    : undefined,
+                  height: ['wall-sm', 'wall-md', 'wall-lg'].includes(config.layout)
+                    ? 'auto'
+                    : undefined,
+                }}
+              >
                 <WidgetPreview
                   layout={config.layout}
                   template={config.template}
@@ -1253,6 +1294,7 @@ export default function NewWidgetPage() {
                   showHeader={config.showHeader}
                   headerText={config.headerText}
                   showWriteReview={config.showWriteReview}
+                  removeBranding={config.removeBranding}
                 />
               </div>
             </div>

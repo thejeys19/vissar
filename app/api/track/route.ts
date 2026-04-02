@@ -29,6 +29,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'widgetId and event required' }, { status: 400, headers: corsHeaders });
     }
 
+    // Validate widgetId format — alphanumeric, underscores, hyphens only
+    const widgetIdRegex = /^[a-zA-Z0-9_-]+$/;
+    if (!widgetIdRegex.test(widgetId) || widgetId.length > 128) {
+      return NextResponse.json({ error: 'Invalid widgetId format' }, { status: 400, headers: corsHeaders });
+    }
+
     if (event !== 'view' && event !== 'click') {
       return NextResponse.json({ error: 'event must be "view" or "click"' }, { status: 400, headers: corsHeaders });
     }

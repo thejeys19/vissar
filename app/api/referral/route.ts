@@ -22,8 +22,7 @@ export async function GET() {
     const count = await redis.get<number>(`referrals:${userId}`) || 0;
     return NextResponse.json({ count });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error('GET /api/referral error:', msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error('GET /api/referral error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
