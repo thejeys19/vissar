@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server';
-import { Redis } from '@upstash/redis';
-import { getWidget } from '@/lib/db';
+import { getWidget } from '@/lib/services/widget.service';
 import { getUserPlanAsync, planLimitForTier } from '@/lib/plans';
-import { MOCK_REVIEWS, MOCK_BUSINESS } from '@/lib/mock-data';
-
-const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
-const GOOGLE_PLACES_API_URL = 'https://places.googleapis.com/v1/places';
-const CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hours
+import { getReviews } from '@/lib/services/review.service';
+import { getUserById } from '@/lib/services/user.service';
 
 export const dynamic = "force-dynamic";
 
-// CORS headers for widget embeds
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -18,218 +13,77 @@ const corsHeaders = {
   'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
 };
 
-function getRedis() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-  return new Redis({ url, token });
-}
-
-interface ReviewItem {
-  id: string;
-  author: string;
-  avatar: string;
-  rating: number;
-  text: string;
-  date: string;
-  relativeTime?: string;
-}
-
-interface ReviewData {
-  business: { name: string; rating: number; totalReviews: number; placeId: string };
-  reviews: ReviewItem[];
-}
-
-interface GoogleReview {
-  name: string;
-  text?: { text: string };
-  authorAttribution: { displayName: string; photoUri?: string };
-  rating: number;
-  publishTime: string;
-  relativePublishTimeDescription: string;
-}
-
-interface GooglePlace {
-  reviews?: GoogleReview[];
-  displayName: { text: string };
-  rating?: number;
-  userRatingCount?: number;
-  id: string;
-}
-
-async function getCachedReviews(placeId: string): Promise<ReviewData | null> {
-  const redis = getRedis();
-  if (!redis) return null;
-  try {
-    // The value might be stored as a string (from REST API) or an object (from SDK)
-    const raw = await redis.get(`reviews:${placeId}`);
-    if (!raw) return null;
-    if (typeof raw === 'string') {
-      try { return JSON.parse(raw) as ReviewData; } catch { return null; }
-    }
-    return raw as ReviewData;
-  } catch {
-    return null;
-  }
-}
-
-async function setCachedReviews(placeId: string, data: ReviewData): Promise<void> {
-  const redis = getRedis();
-  if (!redis) return;
-  try {
-    await redis.set(`reviews:${placeId}`, data, { ex: CACHE_TTL_SECONDS });
-  } catch (err) {
-    console.error('Redis cache write error:', err);
-  }
-}
-
-async function fetchGoogleReviews(placeId: string): Promise<ReviewData | null> {
-  if (!GOOGLE_PLACES_API_KEY) return null;
-
-  try {
-    const response = await fetch(
-      `${GOOGLE_PLACES_API_URL}/${placeId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
-          'X-Goog-FieldMask': 'id,displayName,rating,userRatingCount,reviews',
-        },
-      }
-    );
-
-    if (!response.ok) return null;
-
-    const place: GooglePlace = await response.json();
-
-    const reviews = (place.reviews || [])
-      .filter((review: GoogleReview) => review.text?.text)
-      .map((review: GoogleReview) => ({
-        id: review.name.split('/').pop() || review.name,
-        author: review.authorAttribution.displayName,
-        avatar: review.authorAttribution.photoUri || 
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(review.authorAttribution.displayName)}&background=random`,
-        rating: review.rating,
-        text: review.text?.text || '',
-        date: review.publishTime.split('T')[0],
-        relativeTime: review.relativePublishTimeDescription,
-      }));
-
-    return {
-      business: {
-        name: place.displayName.text,
-        rating: place.rating || 0,
-        totalReviews: place.userRatingCount || 0,
-        placeId: place.id,
-      },
-      reviews,
-    };
-  } catch (error) {
-    console.error('Error fetching Google reviews:', error);
-    return null;
-  }
-}
-
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-  const widgetId = params.id;
-  
-  // Get widget config from database
-  const widget = await getWidget(widgetId);
-  
-  if (!widget) {
-    return NextResponse.json(
-      { error: 'Widget not found' },
-      { status: 404, headers: corsHeaders }
-    );
-  }
+    // Support both Next.js 14 promise params and object params
+    const resolvedParams = params instanceof Promise ? await params : params;
+    const widgetId = resolvedParams.id;
 
-  const { searchParams } = new URL(request.url);
-  const maxReviews = parseInt(searchParams.get('maxReviews') || String(widget.maxReviews || 5), 10);
-  const minRating = parseInt(searchParams.get('minRating') || String(widget.minRating || 1), 10);
+    const widget = await getWidget(widgetId);
 
-  let data: ReviewData;
-  let cacheHit = false;
-
-  // Try to fetch real Google reviews
-  if (widget.placeId && widget.placeId !== 'mock' && GOOGLE_PLACES_API_KEY) {
-    // Check Redis cache first
-    const cached = await getCachedReviews(widget.placeId);
-    const cachedValid = cached && Array.isArray((cached as {reviews?: unknown}).reviews) && (cached as {reviews: unknown[]}).reviews.length > 0;
-    if (cachedValid) {
-      data = cached!;
-      cacheHit = true;
-    } else {
-      const googleData = await fetchGoogleReviews(widget.placeId);
-      if (googleData) {
-        data = googleData;
-        // Cache in Redis (fire-and-forget)
-        setCachedReviews(widget.placeId, googleData);
-      } else {
-        data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
-      }
+    if (!widget) {
+      return NextResponse.json({ error: 'Widget not found' }, { status: 404, headers: corsHeaders });
     }
-  } else {
-    data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
-  }
 
-  // Ensure data has reviews (defensive fallback)
-  if (!data || !Array.isArray(data.reviews)) {
-    data = { business: MOCK_BUSINESS, reviews: MOCK_REVIEWS };
-  }
+    // All settings live in config jsonb — extract with defaults
+    const cfg = (widget.config as Record<string, unknown>) ?? {};
 
-  // Filter reviews
-  const filteredReviews = data.reviews
-    .filter((r: { rating: number }) => r.rating >= minRating)
-    .slice(0, maxReviews);
+    const { searchParams } = new URL(request.url);
+    const maxReviews = parseInt(searchParams.get('maxReviews') || String(cfg.maxReviews ?? 5), 10);
+    const minRating = parseInt(searchParams.get('minRating') || String(cfg.minRating ?? 1), 10);
 
-  // Get user plan for tier/viewLimit
-  const userEmail = widget.userId || (widget as {userEmail?: string}).userEmail || '';
-  const plan = await getUserPlanAsync(userEmail);
-  const tier = plan.plan || 'free';
-  const viewLimit = planLimitForTier(tier);
+    const placeId = widget.placeId || 'mock';
+    const reviewResult = await getReviews(placeId, maxReviews, minRating);
 
-  return NextResponse.json({
-    widget: {
-      id: widget.id,
-      name: widget.name,
-      layout: widget.layout,
-      autoStyle: widget.autoStyle,
-      tier,
-      viewLimit,
-      removeBranding: widget.removeBranding ?? false,
-      template: widget.template,
-      showHeader: widget.showHeader ?? false,
-      showHighlights: widget.showHighlights ?? false,
-      showVerifiedBadge: widget.showVerifiedBadge ?? true,
-      showAvatar: widget.showAvatar ?? true,
-      showDate: widget.showDate ?? true,
-      animations: widget.animations ?? true,
-      animationStyle: widget.animationStyle ?? 'slideUp',
-      colorScheme: widget.colorScheme ?? 'auto',
-      sortBy: widget.sortBy ?? null,
-      textLength: widget.textLength ?? 150,
-      starColor: widget.starColor ?? null,
-      primaryColor: widget.primaryColor ?? null,
-      language: widget.language ?? 'all',
-      dateRange: widget.dateRange ?? 'all',
-      showSentimentBadges: widget.showSentimentBadges ?? true,
-      showReplies: widget.showReplies ?? true,
-      customCss: widget.customCss ?? null,
-    },
-    business: data.business,
-    reviews: filteredReviews,
-    lastUpdated: new Date().toISOString(),
-    source: widget.placeId && widget.placeId !== 'mock' ? 'google' : 'mock',
-    cached: cacheHit,
-  }, { headers: corsHeaders });
+    // Get user plan for tier/viewLimit
+    // widget.userId is the OAuth sub ID — resolve to email since plans are keyed by email
+    const widgetOwner = await getUserById(widget.userId);
+    const userEmail = widgetOwner?.email ?? widget.userId;
+    const plan = await getUserPlanAsync(userEmail);
+    const tier = plan.plan || 'free';
+    const viewLimit = planLimitForTier(tier);
+
+    return NextResponse.json({
+      widget: {
+        id: widget.id,
+        name: widget.name,
+        layout: widget.layout,
+        autoStyle: cfg.autoStyle ?? true,
+        tier,
+        viewLimit,
+        removeBranding: cfg.removeBranding ?? false,
+        template: cfg.template ?? 'soft',
+        showHeader: cfg.showHeader ?? false,
+        showHighlights: cfg.showHighlights ?? false,
+        showVerifiedBadge: cfg.showVerifiedBadge ?? true,
+        showAvatar: cfg.showAvatar ?? true,
+        showDate: cfg.showDate ?? true,
+        animations: cfg.animations ?? true,
+        animationStyle: cfg.animationStyle ?? 'slideUp',
+        colorScheme: cfg.colorScheme ?? 'auto',
+        sortBy: cfg.sortBy ?? null,
+        textLength: cfg.textLength ?? 150,
+        starColor: cfg.starColor ?? null,
+        primaryColor: cfg.primaryColor ?? null,
+        language: cfg.language ?? 'all',
+        dateRange: cfg.dateRange ?? 'all',
+        showSentimentBadges: cfg.showSentimentBadges ?? true,
+        showReplies: cfg.showReplies ?? true,
+        customCss: cfg.customCss ?? null,
+      },
+      business: reviewResult.business,
+      reviews: reviewResult.reviews,
+      lastUpdated: reviewResult.lastUpdated,
+      source: reviewResult.source,
+      cached: reviewResult.cached,
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error('[widget/reviews] Error:', error instanceof Error ? error.message : String(error));
     return NextResponse.json(

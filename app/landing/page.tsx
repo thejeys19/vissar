@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckoutButton } from "@/components/checkout-button";
@@ -79,8 +79,8 @@ const plans = [
     price: "$8",
     period: "/month",
     description: "The full Vissar experience",
-    features: ["3 widgets", "10,000 views/month", "All 10+ templates", "Animations & effects", "No Vissar branding", "Priority support"],
-    cta: "Start Free Trial",
+    features: ["10 widgets", "10,000 views/month", "All 10+ templates", "Animations & effects", "No Vissar branding", "Priority support"],
+    cta: "Get Started",
     highlight: true,
   },
   {
@@ -89,8 +89,18 @@ const plans = [
     price: "$15",
     period: "/month",
     description: "For agencies & high-traffic sites",
-    features: ["9 widgets", "50,000 views/month", "All templates", "Custom CSS", "No branding", "API access", "Priority support"],
-    cta: "Start Free Trial",
+    features: ["Unlimited widgets", "50,000 views/month", "All templates", "Custom CSS", "No branding", "API access", "Priority support"],
+    cta: "Get Started",
+    highlight: false,
+  },
+  {
+    name: "Lifetime",
+    planId: "lifetime" as const,
+    price: "$149",
+    period: "one-time",
+    description: "Pay once, own it forever",
+    features: ["Unlimited widgets", "Unlimited views", "All templates + layouts", "Custom CSS", "No branding", "API access", "All future updates"],
+    cta: "Get Lifetime Access",
     highlight: false,
   },
 ];
@@ -137,12 +147,28 @@ export default function LandingPage() {
               <a href="#reviews" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Reviews</a>
             </nav>
             <div className="flex items-center gap-3">
-              <Link href={dashboardHref} className="hidden sm:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5">
-                {session ? "Dashboard" : "Sign In"}
-              </Link>
-              <Button size="sm" asChild className="bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
-                <Link href={ctaHref}>{session ? "Go to Dashboard" : "Get Started Free"}</Link>
-              </Button>
+              {session ? (
+                <>
+                  <Link href="/dashboard" className="hidden sm:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5">
+                    Dashboard
+                  </Link>
+                  <Button size="sm" variant="outline" className="hidden sm:block text-sm border-slate-200 text-slate-600 hover:text-slate-900" onClick={() => signOut({ callbackUrl: '/' })}>
+                    Sign Out
+                  </Button>
+                  <Button size="sm" asChild className="bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
+                    <Link href="/dashboard/widget/new">New Widget</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/signin" className="hidden sm:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5">
+                    Sign In
+                  </Link>
+                  <Button size="sm" asChild className="bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
+                    <Link href="/auth/signin">Get Started Free</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -577,7 +603,7 @@ export default function LandingPage() {
             <p className="text-lg text-slate-600">Start free. Upgrade when you&apos;re ready. No surprises.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {plans.map((plan) => (
               <div
                 key={plan.name}
@@ -637,7 +663,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <p className="text-center text-slate-500 text-sm mt-8">All plans include a 14-day free trial. No credit card required.</p>
+          <p className="text-center text-slate-500 text-sm mt-8">Free plan, no credit card required. Paid plans cancel anytime.</p>
         </div>
       </section>
 

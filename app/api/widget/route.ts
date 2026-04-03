@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server';
-import { getWidgets, getWidget, saveWidget, deleteWidget } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getUserPlanAsync } from '@/lib/plans';
+import { createWidgetSchema, updateWidgetSchema } from '@/lib/validators/widget';
+import {
+  getWidgetsByUser,
+  getWidget,
+  createWidget,
+  updateWidget,
+  deleteWidget,
+  recordToApiShape,
+} from '@/lib/services/widget.service';
+import type { PlanTier } from '@/lib/types/plan';
 
 export async function GET() {
   try {
@@ -12,10 +21,10 @@ export async function GET() {
     }
     const userId = (session.user as { id?: string })?.id || session.user.email;
 
-    const widgets = await getWidgets();
-    // Return only widgets owned by this user — no fallback for anonymous widgets
-    const filtered = widgets.filter(w => w.userId === userId);
-    return NextResponse.json(filtered);
+    const plan = await getUserPlanAsync(session.user.email);
+    const records = await getWidgetsByUser(userId);
+    const widgets = records.map(r => recordToApiShape(r, plan.plan as PlanTier));
+    return NextResponse.json(widgets);
   } catch (error) {
     console.error('GET /api/widget error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -31,26 +40,24 @@ export async function POST(request: Request) {
     const userId = (session.user as { id?: string })?.id || session.user.email;
 
     const body = await request.json();
+    const parsed = createWidgetSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
+    }
 
-    // Get tier from user's actual plan, never trust client-supplied tier
     const plan = await getUserPlanAsync(session.user.email);
-    const tier = plan.plan;
+    const tier = plan.plan as PlanTier;
+    const { name, layout, placeId, template, maxReviews, minRating, autoStyle, animations } = parsed.data;
 
-    // Whitelist allowed fields — do NOT spread entire body
-    const widget = await saveWidget({
-      // No client-supplied `id` for creation — server generates it
-      name: body.name,
-      layout: body.layout,
-      template: body.template,
-      maxReviews: body.maxReviews,
-      minRating: body.minRating,
-      autoStyle: body.autoStyle,
-      animations: body.animations,
-      placeId: body.placeId,
+    const record = await createWidget({
       userId,
-      tier, // from server-side plan, not client
+      name: name ?? 'Untitled Widget',
+      placeId: placeId ?? null,
+      layout: layout ?? 'carousel',
+      config: { template, maxReviews, minRating, autoStyle, animations },
     });
-    return NextResponse.json(widget);
+
+    return NextResponse.json(recordToApiShape(record, tier));
   } catch (error) {
     console.error('POST /api/widget error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -66,13 +73,13 @@ export async function PUT(request: Request) {
     const userId = (session.user as { id?: string })?.id || session.user.email;
 
     const body = await request.json();
-    const { id } = body;
-
-    if (!id) {
-      return NextResponse.json({ error: 'Widget ID required for update' }, { status: 400 });
+    const parsed = updateWidgetSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
     }
 
-    // Verify ownership before updating
+    const { id, name, layout, placeId, template, maxReviews, minRating, autoStyle, animations } = parsed.data;
+
     const existing = await getWidget(id);
     if (!existing) {
       return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
@@ -81,26 +88,30 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Get tier from server — never trust client
     const plan = await getUserPlanAsync(session.user.email);
-    const tier = plan.plan;
+    const tier = plan.plan as PlanTier;
 
-    // Whitelist fields for update
-    const widget = await saveWidget({
-      id: existing.id, // use existing id
-      name: body.name,
-      layout: body.layout,
-      template: body.template,
-      maxReviews: body.maxReviews,
-      minRating: body.minRating,
-      autoStyle: body.autoStyle,
-      animations: body.animations,
-      placeId: body.placeId,
-      userId: existing.userId, // preserve original owner
-      tier, // from server-side plan
-      createdAt: existing.createdAt, // preserve creation time
+    const updatedConfig = {
+      ...((existing.config as object) ?? {}),
+      ...(template !== undefined ? { template } : {}),
+      ...(maxReviews !== undefined ? { maxReviews } : {}),
+      ...(minRating !== undefined ? { minRating } : {}),
+      ...(autoStyle !== undefined ? { autoStyle } : {}),
+      ...(animations !== undefined ? { animations } : {}),
+    };
+
+    const record = await updateWidget(id, userId, {
+      ...(name !== undefined ? { name } : {}),
+      ...(layout !== undefined ? { layout } : {}),
+      ...(placeId !== undefined ? { placeId } : {}),
+      config: updatedConfig,
     });
-    return NextResponse.json(widget);
+
+    if (!record) {
+      return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(recordToApiShape(record, tier));
   } catch (error) {
     console.error('PUT /api/widget error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -122,7 +133,6 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'ID required' }, { status: 400 });
     }
 
-    // Verify ownership before deleting
     const existing = await getWidget(id);
     if (!existing) {
       return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
@@ -131,7 +141,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const success = await deleteWidget(id);
+    const success = await deleteWidget(id, userId);
     if (!success) {
       return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
     }

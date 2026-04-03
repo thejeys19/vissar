@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getWidget, deleteWidget } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { getUserPlanAsync } from '@/lib/plans';
+import { getWidget, deleteWidget, recordToApiShape } from '@/lib/services/widget.service';
+import type { PlanTier } from '@/lib/types/plan';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -15,18 +17,17 @@ export async function GET(
     const userId = (session.user as { id?: string })?.id || session.user.email;
 
     const { id } = await params;
-    const widget = await getWidget(id);
+    const record = await getWidget(id);
 
-    if (!widget) {
+    if (!record) {
       return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
     }
-
-    // Verify ownership
-    if (widget.userId && widget.userId !== userId) {
+    if (record.userId !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    return NextResponse.json(widget);
+    const plan = await getUserPlanAsync(session.user.email);
+    return NextResponse.json(recordToApiShape(record, plan.plan as PlanTier));
   } catch (error) {
     console.error('GET /api/widget/[id] error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -34,7 +35,7 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -45,18 +46,16 @@ export async function DELETE(
     const userId = (session.user as { id?: string })?.id || session.user.email;
 
     const { id } = await params;
-    const widget = await getWidget(id);
+    const record = await getWidget(id);
 
-    if (!widget) {
+    if (!record) {
       return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
     }
-
-    // Verify ownership
-    if (widget.userId && widget.userId !== userId) {
+    if (record.userId !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const success = await deleteWidget(id);
+    const success = await deleteWidget(id, userId);
     if (!success) {
       return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
     }

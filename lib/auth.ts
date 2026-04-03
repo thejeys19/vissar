@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { getUserByEmail } from "@/lib/db";
+import { getUserByEmail, upsertUser } from "@/lib/services/user.service";
 
 // Extend session type
 declare module "next-auth" {
@@ -22,9 +22,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user.email) {
+        // Auto-provision user in Postgres on first sign-in
+        try {
+          await upsertUser({
+            id: user.id || user.email,
+            email: user.email,
+            name: user.name ?? null,
+          });
+        } catch (err) {
+          console.error('Failed to upsert user on sign-in:', err);
+          // Don't block sign-in for DB errors
+        }
         return true;
       }
       return false;
@@ -32,7 +42,6 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         (session.user as { id?: string }).id = token.sub;
-        // Use custom name from DB if set, otherwise fall back to token name
         if (token.customName) {
           session.user.name = token.customName as string;
         }
@@ -42,7 +51,6 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger, session: updateData }) {
       if (user) {
         token.id = user.id;
-        // On first sign-in, load custom name from DB
         if (user.email) {
           try {
             const dbUser = await getUserByEmail(user.email);
@@ -50,7 +58,6 @@ export const authOptions: NextAuthOptions = {
           } catch {}
         }
       }
-      // When update() is called from the client with a new name
       if (trigger === "update" && updateData?.name) {
         token.customName = updateData.name;
       }

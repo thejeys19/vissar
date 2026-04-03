@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { saveUser, getUserByEmail, getWidgetsByUser, deleteWidget } from '@/lib/db';
+import { updateSettingsSchema } from '@/lib/validators/user';
+import { getUserByEmail, updateUserName, deleteUser } from '@/lib/services/user.service';
+import { deleteAllUserWidgets } from '@/lib/services/widget.service';
 import { Redis } from '@upstash/redis';
 
 function getRedis() {
@@ -16,15 +18,27 @@ export async function POST(request: NextRequest) {
   if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await request.json();
-  const { name } = body;
+  const parsed = updateSettingsSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
+  }
 
-  const existing = await getUserByEmail(session.user.email);
-  await saveUser({
-    ...existing,
-    id: existing?.id || session.user.email,
-    email: session.user.email,
-    name: name || session.user.name || 'User',
-  });
+  const { name } = parsed.data;
+  if (name) {
+    // Ensure user exists first
+    const existing = await getUserByEmail(session.user.email);
+    if (!existing) {
+      // Auto-create user record on first settings update
+      const { upsertUser } = await import('@/lib/services/user.service');
+      await upsertUser({
+        id: (session.user as { id?: string }).id || session.user.email,
+        email: session.user.email,
+        name,
+      });
+    } else {
+      await updateUserName(session.user.email, name);
+    }
+  }
 
   return NextResponse.json({ success: true, name });
 }
@@ -37,18 +51,19 @@ export async function DELETE() {
   const userId = (session.user as { id?: string }).id || email;
 
   try {
-    // Delete all user widgets
-    const widgets = await getWidgetsByUser(userId).catch(() => []);
-    for (const w of widgets) {
-      await deleteWidget(w.id);
-    }
+    // Delete all user widgets from Postgres (cascades to related data)
+    await deleteAllUserWidgets(userId);
 
-    // Remove user plan from Redis
+    // Delete user from Postgres
+    await deleteUser(email);
+
+    // Clean up Redis data (plans, notifications, custom domain, api key)
     const redis = getRedis();
     if (redis) {
       await redis.hdel('plans', email);
       await redis.del(`notifications:${email}`);
       await redis.del(`customDomain:${email}`);
+      await redis.del(`apikey:${email}`);
     }
 
     return NextResponse.json({ success: true, deleted: true });

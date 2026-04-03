@@ -466,3 +466,286 @@ Core reasons:
 **Most important delta from prior reviews:** the biggest missed issue is **G1** — `POST /api/widget` is not just mass assignment, it is an unauthenticated arbitrary overwrite primitive for any widget ID.
 
 ---
+
+## Post-Rebuild Audit — Pass 2 (GPT-5.4)
+### Findings
+
+#### 1. CRITICAL — Authenticated users can self-upgrade to paid tiers without paying
+- **File:** `app/api/user/plan/route.ts`
+- **Issue:** `POST /api/user/plan` lets any authenticated user set their own plan to `pro` or `business` directly:
+  - accepts `{ plan }` from client
+  - writes it via `setUserPlan()`
+  - no Stripe/payment/admin verification
+- **Impact:** straight privilege escalation and revenue bypass. This also unlocks downstream gated features such as API key issuance and custom domains, because those endpoints trust the stored plan.
+- **Why it matters post-rebuild:** ownership is fixed now, but authorization is still wrong. The endpoint no longer lets users change *other* users’ plans; it still lets them grant themselves paid access.
+
+#### 2. HIGH — Live Vercel OIDC tokens are present in env files on disk
+- **Files:** `.env.local`, `.env.production`
+- **Issue:** both files contain live-looking `VERCEL_OIDC_TOKEN` JWTs.
+- **Impact:** if these files were ever committed, copied, synced, or exposed through backups/logs, they provide bearer-token style infrastructure access. Even if `.gitignore` now excludes them, the tokens should be treated as compromised and rotated.
+- **Note:** `.gitignore` does include `.env*.local`, `.env.production`, and `.env.vercel.*`, so the current ignore rules are better than Pass 1. The risk is the secret material itself already existing in project files.
+
+#### 3. MEDIUM — No CSP/HSTS; current headers are only partial hardening
+- **File:** `next.config.mjs`
+- **Issue:** rebuild added useful headers (`X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`), but there is still:
+  - no `Content-Security-Policy`
+  - no `Strict-Transport-Security`
+  - legacy `X-XSS-Protection` header, which is obsolete and should not be relied on
+- **Impact:** not an auth bypass by itself, but still below a strong production baseline for a SaaS dashboard with authenticated surfaces and public embeds.
+
+#### 4. MEDIUM — Rate limiting fails open on Redis outage/misconfiguration
+- **File:** `lib/ratelimit.ts`
+- **Issue:** when Redis is unavailable or errors, `checkRateLimit()` returns `{ allowed: true }`.
+- **Affected sensitive routes:** `app/api/admin/set-plan/route.ts`, `app/api/checkout/route.ts`, `app/api/places/search/route.ts`, `app/api/user/api-key/route.ts`
+- **Impact:** brute-force and abuse protections disappear exactly when infrastructure is degraded. For `admin/set-plan`, this weakens the shared-secret control significantly.
+
+#### 5. MEDIUM — Database layer lacks enum/check constraints for security-sensitive fields
+- **Files:** `lib/db/schema/users.ts`, `lib/db/schema/widgets.ts`
+- **Issue:** fields such as `users.plan` and `widgets.layout` are plain `text`, and `widgets.config` is unconstrained `jsonb`.
+- **Impact:** route-level Zod validation is good, but the DB does not enforce allowed values. Any future internal script, admin tool, migration, or missed route validator can write invalid/privileged state directly.
+- **Security angle:** this increases blast radius for mass-assignment or privilege bugs and weakens defense in depth.
+
+#### 6. LOW — Public review/embed endpoints remain intentionally public and wildcard-CORS, but abuse controls are thin
+- **Files:** `app/api/track/route.ts`, `app/api/widget/[id]/reviews/route.ts`, `app/api/widget/[id]/highlights/route.ts`
+- **Issue:** this appears intentional for embeddable widgets, and current input validation is materially better than before. Still, these endpoints:
+  - allow cross-origin access from anywhere
+  - do not bind requests to approved embed domains
+  - rely on basic validation rather than origin/domain authorization
+- **Impact:** mostly analytics inflation / scraping / quota abuse risk, not a direct auth bypass in the rebuilt code.
+
+### Pass 1 Cross-Check
+- **Agree:** the rebuild fixed a lot of the Pass 1 launch blockers:
+  - middleware now exists and covers `/dashboard/*` and `/api/*`
+  - widget CRUD routes now enforce auth + ownership checks
+  - analytics/widget and usage routes now verify ownership
+  - admin set-plan now has validation, rate limiting, and timing-safe comparison
+  - security headers are partially present
+  - `.gitignore` now covers `.env.production`
+- **Disagree / downgrade:** several Pass 1 issues are no longer current in the rebuilt codebase, especially the unauthenticated widget deletion/read paths and missing middleware claim.
+- **Still agree on substance:** launch should still be blocked, but for a narrower reason set now.
+- **Biggest remaining blocker after rebuild:** `POST /api/user/plan` is still a privilege-escalation endpoint. That is the one issue I would treat as immediate stop-ship.
+
+### Verdict
+**BLOCK**
+
+Reasons:
+- **Stop-ship:** authenticated self-upgrade to `pro`/`business` in `app/api/user/plan/route.ts`
+- **Must remediate before production confidence:** rotate/remove the exposed Vercel OIDC tokens from env files; tighten header baseline; decide whether rate limiting should fail closed or at least hard-fail on the admin route
+
+If the self-upgrade route is removed or restricted to verified billing/admin flows, and the OIDC tokens are rotated, this rebuild is much closer to launch-ready than Pass 1 was.
+
+---
+
+
+---
+
+## Post-Rebuild Audit — Pass 1 (Sonnet)
+
+**Date:** 2026-04-02T21:14:00Z  
+**Auditor:** Subagent (Sonnet) — fresh cold read, independent of prior reports  
+**Scope:** All 20 API route files, middleware.ts, lib/services/*, lib/db/schema/*, lib/validators/*, lib/auth.ts, lib/ratelimit.ts, lib/plans.ts, next.config.mjs, .gitignore, .env files  
+**Context:** Rebuild replaced Redis-as-DB with PostgreSQL + Drizzle, added Zod validation, service layer, middleware, rate limiting, and security headers.
+
+---
+
+### Findings
+
+#### What the Rebuild Fixed (Prior Issues Now Resolved)
+
+| Prior Issue | Status |
+|-------------|--------|
+| Middleware missing (H1) | FIXED — middleware.ts covers /dashboard/* and /api/* |
+| Widget routes unauthenticated (H2) | FIXED — all widget CRUD checks session + ownership |
+| Admin set-plan no rate limit (C4) | FIXED — 3/min rate limit + timingSafeEqual |
+| Security headers missing (H3) | FIXED — X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy added |
+| Widget DELETE unauthenticated | FIXED — both /api/widget and /api/widget/[id] check auth + ownership |
+| Analytics widget ownership | FIXED — ownership check in analytics/widget route |
+| Usage route unauthenticated | FIXED — auth + ownership check added |
+| API key predictable hash (N4) | FIXED — now uses randomBytes(32) |
+| Webhook resolvePlan bad default (N9) | FIXED — defaults to "free" |
+| .gitignore missing .env.production | FIXED — .env.production now in gitignore |
+| Plan POST lets user change anyone's plan (C5) | FIXED — targetEmail = session.user.email hardcoded |
+| Debug routes (C1/C2) | CONFIRMED GONE — no debug routes in rebuilt source |
+
+**12 of ~15 prior stop-ship issues are resolved. Major improvement.**
+
+---
+
+#### R1: CRITICAL — Self-Upgrade to Pro/Business Without Paying
+
+**File:** app/api/user/plan/route.ts (POST handler)
+
+Any authenticated user can POST { "plan": "pro" } and immediately receive a pro plan with no payment verification. This grants:
+- API key access (gated on plan === 'pro' || 'business')
+- Custom domain access (same gate)
+- 10,000 view limit (vs 200 free)
+
+No Stripe, no webhook, no admin check. The prior C5 fix only prevented changing *other* users' plans. This is users upgrading *themselves*.
+
+**Fix:** Remove the POST handler or restrict it to admin-only. Plan writes should only come from /api/webhook (Stripe) or /api/admin/set-plan. Never from a self-serve authenticated endpoint.
+
+---
+
+#### R2: HIGH — customCss and removeBranding Returned Without Plan Check on Public Widget Endpoint
+
+**File:** app/api/widget/[id]/reviews/route.ts (lines 58, 76)
+
+These fields are read directly from the config JSONB column and returned to the public CORS-wildcard endpoint:
+```
+removeBranding: cfg.removeBranding ?? false,
+customCss: cfg.customCss ?? null,
+```
+
+The write validators correctly exclude these fields, but the *read path* has no plan-tier gating. If these values exist in config (via admin tool, direct DB write, or future migration), the public widget endpoint serves them regardless of the owner's actual plan.
+
+**Fix:** Before returning removeBranding/customCss, check the widget owner's plan. Only serve these values if tier === 'pro' || 'business'.
+
+---
+
+#### R3: HIGH — widget.userId Used as Email for Plan Lookup — All Widgets Get Free Tier
+
+**File:** app/api/widget/[id]/reviews/route.ts (line 45)
+
+```
+const userEmail = widget.userId;
+const plan = await getUserPlanAsync(userEmail);
+```
+
+widget.userId is the Google OAuth subject ID (e.g. "107..."), not an email. getUserPlanAsync() keys on email. These will never match, so every widget lookup returns plan = 'free' regardless of what the owner paid for.
+
+Effect: all tier-gated behavior (viewLimit, branding, feature flags) is silently wrong for paid users.
+
+**Fix:** Look up the widget owner's email from the users table before calling getUserPlanAsync. Or store email on the widget record at creation time.
+
+---
+
+#### R4: HIGH — Rate Limiting Fails Open on Redis Outage
+
+**File:** lib/ratelimit.ts
+
+Both the "Redis not configured" path and the error catch path return { allowed: true }:
+```
+if (!redis) {
+  return { allowed: true, remaining: maxRequests };
+}
+// ...
+} catch (error) {
+  return { allowed: true, remaining: maxRequests };
+}
+```
+
+This affects admin/set-plan, checkout, API key generation, and places search. Brute-force protection disappears silently during any Redis degradation.
+
+**Fix:** For security-critical routes (admin, checkout), fail closed — return 503 if rate limiting cannot be verified. Add alerting when rate limiting is bypassed.
+
+---
+
+#### R5: MEDIUM — /api/reviews Public Endpoint Has No Auth, Rate Limiting, or placeId Validation
+
+**File:** app/api/reviews/route.ts
+
+placeId from query params is passed to fetchFromGoogle() and used as a Redis cache key (reviews:${placeId}). No format validation, no auth, no rate limiting. Any external caller can trigger unlimited Google Places API requests. A malformed placeId with colons could create Redis key namespace collisions.
+
+**Fix:** Validate placeId format (Google Place IDs are alphanumeric, ~27+ chars, start with ChIJ). Add rate limiting per IP. Consider requiring auth.
+
+---
+
+#### R6: MEDIUM — /api/track Doesn't Verify Widget Exists — Analytics Inflation Attack
+
+**File:** app/api/track/route.ts
+
+The Zod validator checks widgetId format but doesn't verify the widget exists. Attackers can inflate any widget's view counts. For free-tier users, this could exhaust the 200-view monthly limit — a targeted denial-of-service against specific users.
+
+**Fix:** Add a DB existence check for widgetId before incrementing Redis counters. Cache result briefly to avoid overhead.
+
+---
+
+#### R7: MEDIUM — users.plan Has No DB-Level Constraint
+
+**File:** lib/db/schema/users.ts
+
+```
+plan: text('plan').notNull().default('free'),
+```
+
+Only Zod/route-level validation enforces allowed values. A direct DB insert, migration script, or admin tool could write "premium" or "superadmin" and break === comparisons silently throughout the codebase.
+
+**Fix:** Add a PostgreSQL check constraint via Drizzle to enforce ('free', 'pro', 'business').
+
+---
+
+#### R8: MEDIUM — Missing CSP and HSTS; Deprecated XSS-Protection Header Present
+
+**File:** next.config.mjs
+
+Present: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-XSS-Protection.
+Missing: Content-Security-Policy, Strict-Transport-Security.
+Note: X-XSS-Protection is a deprecated header. Modern browsers ignore it; it can create vulnerabilities in old IE. Should be removed.
+
+**Fix:** Add CSP and HSTS. Remove X-XSS-Protection.
+
+---
+
+#### R9: LOW — Live OIDC Tokens in Env Files Currently Tracked by Git
+
+**Files:** .env.production, .env.vercel.debug, .env.local
+
+.gitignore now correctly excludes these files, but git ls-files confirms .env.production is currently tracked. Any git history traversal exposes the tokens.
+
+**Fix:** Run git rm --cached .env.production .env.vercel.debug to untrack. Rotate all three OIDC tokens. Audit git history.
+
+---
+
+#### R10: LOW — Error Detail Leak on Public Widget Endpoint
+
+**File:** app/api/widget/[id]/reviews/route.ts
+
+```
+{ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) }
+```
+
+Internal error messages are returned in JSON to any caller on this public CORS endpoint.
+
+**Fix:** Return only { error: 'Internal server error' }. Log details server-side.
+
+---
+
+### Summary Table
+
+| ID | Severity | Issue |
+|----|----------|-------|
+| R1 | CRITICAL | Self-upgrade to pro/business without paying via POST /api/user/plan |
+| R2 | HIGH | customCss/removeBranding served without plan check on public widget route |
+| R3 | HIGH | Widget reviews uses userId (not email) for plan lookup — all widgets get free tier |
+| R4 | HIGH | Rate limiting fails open on Redis outage — admin/checkout unprotected during degradation |
+| R5 | MEDIUM | /api/reviews: no placeId validation, no auth, no rate limit, burns Google quota |
+| R6 | MEDIUM | /api/track doesn't verify widget exists — analytics inflation + usage exhaustion |
+| R7 | MEDIUM | users.plan has no DB check constraint |
+| R8 | MEDIUM | Missing CSP and HSTS; deprecated XSS-Protection header present |
+| R9 | LOW | Live OIDC tokens in git-tracked env files |
+| R10 | LOW | Error detail leak on public widget endpoint |
+
+**Prior issues fixed by rebuild: 12 of ~15**
+
+---
+
+### Verdict
+
+**BLOCK — But Close**
+
+The rebuild eliminated the worst issues. The codebase is materially stronger: middleware exists, widget ownership is enforced, admin endpoint is hardened, debug routes are gone, API keys use random bytes.
+
+**The one stop-ship blocker is R1:** any logged-in user can self-upgrade to pro/business by posting { "plan": "pro" }. This bypasses Stripe entirely and grants access to paid features. Cannot ship with this route accepting user-controlled plan upgrades.
+
+**R3 is also practically blocking:** all paid users' widgets are served as free-tier because of the userId/email mismatch. The plan enforcement is broken at the read path.
+
+**Fix order before launch:**
+1. R1 (CRITICAL): Remove or restrict POST /api/user/plan — 5 min
+2. R3 (HIGH): Fix plan lookup in widget reviews to use email not userId — 15 min
+3. R9 (LOW but time-sensitive): Untrack env files from git, rotate OIDC tokens — 10 min
+4. R2 (HIGH): Gate customCss/removeBranding on owner plan — 20 min
+5. R4 (HIGH): Fail closed on rate limit check for admin/checkout — 30 min
+6. R5/R6 (MEDIUM): Validate placeId; add DB check to track endpoint — 30 min
+7. R7/R8 (MEDIUM): DB constraints; add CSP + HSTS — 30 min
+
+**Estimated time to launch-ready: ~2.5 hours.** The structural work is done.

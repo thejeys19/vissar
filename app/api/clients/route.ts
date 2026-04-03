@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { z } from 'zod';
 
 function getRedis() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) throw new Error(`Redis not configured: url=${!!url} token=${!!token}`);
+  if (!url || !token) throw new Error(`Redis not configured`);
   return new Redis({ url, token });
 }
 
@@ -18,6 +19,11 @@ interface Client {
   plan: string;
   createdAt: string;
 }
+
+const createClientSchema = z.object({
+  name: z.string().min(1).max(200),
+  email: z.string().email(),
+});
 
 export async function GET() {
   try {
@@ -40,11 +46,13 @@ export async function POST(request: Request) {
     const userId = (session?.user as { id?: string })?.id || session?.user?.email;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { name, email } = await request.json();
-    if (!name || !email) {
-      return NextResponse.json({ error: 'Name and email required' }, { status: 400 });
+    const body = await request.json();
+    const parsed = createClientSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
     }
 
+    const { name, email } = parsed.data;
     const redis = getRedis();
     const clients = await redis.get<Client[]>(`clients:${userId}`) || [];
 

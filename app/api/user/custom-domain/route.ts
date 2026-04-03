@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getUserPlanAsync } from '@/lib/plans';
+import { customDomainSchema } from '@/lib/validators/user';
 import { Redis } from '@upstash/redis';
 
 function getRedis() {
@@ -32,14 +33,16 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  let { domain } = body;
+  const parsed = customDomainSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
+  }
 
-  // Allow clearing the domain
+  let domain = parsed.data.domain;
+
   if (domain === '' || domain === null || domain === undefined) {
     const redis = getRedis();
-    if (redis) {
-      await redis.set(`customDomain:${session.user.email}`, '');
-    }
+    if (redis) await redis.set(`customDomain:${session.user.email}`, '');
     return NextResponse.json({ success: true, domain: '' });
   }
 
@@ -50,16 +53,13 @@ export async function POST(request: NextRequest) {
     .trim()
     .toLowerCase();
 
-  // Validate domain format
   const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
   if (!domainRegex.test(domain)) {
     return NextResponse.json({ error: 'Invalid domain format' }, { status: 400 });
   }
 
   const redis = getRedis();
-  if (redis) {
-    await redis.set(`customDomain:${session.user.email}`, domain);
-  }
+  if (redis) await redis.set(`customDomain:${session.user.email}`, domain);
 
   return NextResponse.json({ success: true, domain });
 }
