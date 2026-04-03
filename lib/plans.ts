@@ -60,6 +60,7 @@ export function planLimitForTier(plan: string): number {
   switch (plan) {
     case "business": return 50000;
     case "pro": return 10000;
+    case "lifetime": return Infinity;
     default: return 200;
   }
 }

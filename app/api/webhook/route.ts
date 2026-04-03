@@ -6,7 +6,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 function resolvePlan(metadata: Record<string, string> | null | undefined): string {
   const planId = metadata?.planId;
-  if (planId === "business" || planId === "pro") return planId;
+  if (planId === "business" || planId === "pro" || planId === "lifetime") return planId;
   return "free";
 }
 
